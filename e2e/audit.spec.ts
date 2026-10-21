@@ -179,6 +179,10 @@ void loop() {
     });
     await page.waitForTimeout(400);
 
+    // Switch to Circuit Check tab to inspect checklist & fix-it
+    await page.locator('button:has-text("Circuit Check")').first().click();
+    await page.waitForTimeout(300);
+
     // Verify failing check and "Fix it for me" button
     await expect(page.locator('text=pinMode(8, OUTPUT) in code').first()).toBeVisible();
     const fixBtn = page.locator('button:has-text("Fix it for me")').first();
@@ -218,13 +222,17 @@ void loop() {
       await page.waitForTimeout(400);
     }
 
+    // Switch to Split Studio tab to test simultaneous Canvas + Editor + Serial Monitor
+    await page.locator('button:has-text("Split")').first().click();
+    await page.waitForTimeout(300);
+
     // Click "Fit to view"
     const fitBtn = page.locator('button:has-text("Fit to view")');
     await fitBtn.click();
     await page.waitForTimeout(300);
 
     // Verify Canvas Studio, Code Editor, and Serial Monitor are all visible without hunting
-    await expect(page.locator('text=Circuit Check').first()).toBeVisible();
+    await expect(page.locator('button:has-text("Circuit Check")').first()).toBeVisible();
     await expect(page.locator('text=Serial Monitor & Telemetry')).toBeVisible();
 
     // Take 1920px screenshot
