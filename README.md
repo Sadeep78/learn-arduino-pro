@@ -5,14 +5,14 @@
 
 **An advanced, interactive browser-based Arduino learning platform, 3D digital twin, and real-time electronic circuit simulator.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-16B8B0.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
-[![React 18](https://img.shields.io/badge/React-18.3-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Three.js](https://img.shields.io/badge/Three.js-R3F-black.svg?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
-[![Vitest](https://img.shields.io/badge/Vitest-14%20Passing-success.svg?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
-[![PWA Ready](https://img.shields.io/badge/PWA-Installable-blueviolet.svg?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-00B4D8?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=006699)](LICENSE)
+[![React 18](https://img.shields.io/badge/React-18.3-38BDF8?style=for-the-badge&logo=react&logoColor=white&labelColor=0284C7)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3B82F6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1E40AF)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.4-A855F7?style=for-the-badge&logo=vite&logoColor=white&labelColor=6D28D9)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-14B8A6?style=for-the-badge&logo=tailwind-css&logoColor=white&labelColor=0F766E)](https://tailwindcss.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-R3F-FB923C?style=for-the-badge&logo=three.js&logoColor=white&labelColor=C2410C)](https://threejs.org/)
+[![Vitest](https://img.shields.io/badge/Vitest-14%20Passing-84CC16?style=for-the-badge&logo=vitest&logoColor=white&labelColor=3F6212)](https://vitest.dev/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Installable-EC4899?style=for-the-badge&logo=pwa&logoColor=white&labelColor=BE185D)](https://web.dev/progressive-web-apps/)
 
 [✨ GitHub Repository](https://github.com/Sadeep78/learn-arduino-pro) • [📖 Documentation](#-curriculum--learning-path) • [🛠️ Circuit Simulator](#-in-browser-circuit-simulator) • [💡 Component Catalog](#-simulated-electronics-library) • [📜 License](LICENSE)
 
