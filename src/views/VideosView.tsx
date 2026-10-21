@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Video,
   Play,
@@ -51,23 +51,23 @@ export const VideosView: React.FC = () => {
     }
   }, [activeChapterIndex]);
 
-  const handleTimeChange = (curr: number, dur: number) => {
+  const handleTimeChange = useCallback((curr: number, dur: number) => {
     setCurrentTime(curr);
     setDuration(dur);
-  };
+  }, []);
 
-  const handleActiveChapterChange = (chapter: VideoChapter, index: number) => {
+  const handleActiveChapterChange = useCallback((chapter: VideoChapter, index: number) => {
     setActiveChapter(chapter);
     setActiveChapterIndex(index);
-  };
+  }, []);
 
-  const handleSelectChapter = (chapter: VideoChapter, index: number) => {
+  const handleSelectChapter = useCallback((chapter: VideoChapter, index: number) => {
     setActiveChapter(chapter);
     setActiveChapterIndex(index);
     if (playerRef.current) {
       playerRef.current.seekTo(chapter.time);
     }
-  };
+  }, []);
 
   // Find linked lesson if active chapter has lessonId
   const linkedLesson = activeChapter.lessonId

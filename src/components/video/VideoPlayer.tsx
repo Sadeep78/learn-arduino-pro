@@ -155,6 +155,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     [chapters]
   );
 
+  // Keep stable refs to volatile callbacks so useEffect does not tear down the player on time ticks
+  const onTimeChangeRef = useRef(onTimeChange);
+  const onActiveChapterChangeRef = useRef(onActiveChapterChange);
+  const getActiveChapterRef = useRef(getActiveChapter);
+
+  useEffect(() => {
+    onTimeChangeRef.current = onTimeChange;
+    onActiveChapterChangeRef.current = onActiveChapterChange;
+    getActiveChapterRef.current = getActiveChapter;
+  });
+
   // Expose player methods via playerRef
   useEffect(() => {
     if (!playerRef) return;
@@ -221,7 +232,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         try {
           ytPlayerRef.current = new window.YT.Player(mountDiv, {
             videoId: youtubeId,
-            host: 'https://www.youtube-nocookie.com',
+            host: 'https://www.youtube.com',
             playerVars: {
               enablejsapi: 1,
               autoplay: 0,
@@ -240,10 +251,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                 const dur = event.target?.getDuration?.() || 0;
                 setDuration(dur);
-                onTimeChange?.(0, dur);
+                onTimeChangeRef.current?.(0, dur);
 
-                const { chapter, index } = getActiveChapter(0);
-                if (chapter) onActiveChapterChange?.(chapter, index);
+                const { chapter, index } = getActiveChapterRef.current(0);
+                if (chapter) onActiveChapterChangeRef.current?.(chapter, index);
               },
               onStateChange: (event: any) => {
                 if (!isMounted) return;
@@ -260,15 +271,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                       setCurrentTime(curr);
                       setDuration(dur);
-                      onTimeChange?.(curr, dur);
+                      onTimeChangeRef.current?.(curr, dur);
 
                       try {
                         localStorage.setItem(storageKey, String(curr));
                       } catch (_) {}
 
-                      const { chapter, index } = getActiveChapter(curr);
+                      const { chapter, index } = getActiveChapterRef.current(curr);
                       if (chapter) {
-                        onActiveChapterChange?.(chapter, index);
+                        onActiveChapterChangeRef.current?.(chapter, index);
                       }
                     }, 500);
                   }
@@ -343,7 +354,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ytPlayerRef.current = null;
       }
     };
-  }, [youtubeId, getActiveChapter, onTimeChange, onActiveChapterChange, storageKey]);
+  }, [youtubeId, storageKey]);
 
   // Keyboard navigation shortcuts
   useEffect(() => {
