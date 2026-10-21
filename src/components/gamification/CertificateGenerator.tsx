@@ -63,7 +63,7 @@ export const CertificateGenerator: React.FC = () => {
       doc.setFontSize(11);
       doc.setFont('courier', 'normal');
       doc.setTextColor(22, 184, 176);
-      doc.text('EXPLORE · UNDERSTAND · BUILD', 148.5, 50, { align: 'center' });
+      doc.text('DESIGN · SIMULATE · INNOVATE', 148.5, 50, { align: 'center' });
 
       // Title
       doc.setFontSize(18);

@@ -58,7 +58,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ collapsed = false, classNa
             </span>
           </div>
           <span className="text-[9px] font-mono tracking-widest text-blueprint-navyMuted dark:text-gray-400 font-semibold mt-1">
-            {t('brand.tagline', 'EXPLORE · UNDERSTAND · BUILD')}
+            {t('brand.tagline', 'DESIGN · SIMULATE · INNOVATE')}
           </span>
         </div>
       )}

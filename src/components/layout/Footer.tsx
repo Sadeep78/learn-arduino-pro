@@ -11,7 +11,7 @@ export const Footer: React.FC = () => {
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-blueprint-teal" />
           <span className="font-bold text-blueprint-navy dark:text-white">Learn Arduino Pro</span>
-          <span>— {t('brand.tagline', 'EXPLORE · UNDERSTAND · BUILD')}</span>
+          <span>— {t('brand.tagline', 'DESIGN · SIMULATE · INNOVATE')}</span>
         </div>
 
         <div className="flex items-center gap-1.5 font-medium">
