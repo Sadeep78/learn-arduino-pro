@@ -11,7 +11,8 @@ import {
   Award,
   ShieldAlert,
   Wrench,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 import { useSimulatorStore } from '../../store/useSimulatorStore';
 import { useUIStore } from '../../store/useUIStore';
@@ -23,12 +24,16 @@ interface CircuitCheckPanelProps {
   isDocked?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onClose?: () => void;
+  className?: string;
 }
 
 export const CircuitCheckPanel: React.FC<CircuitCheckPanelProps> = ({
   isDocked = false,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  onClose,
+  className = ''
 }) => {
   const [internalExpanded, setInternalExpanded] = useState<boolean>(true);
 
@@ -112,9 +117,11 @@ export const CircuitCheckPanel: React.FC<CircuitCheckPanelProps> = ({
     );
   }
 
-  const containerClasses = isDocked
-    ? 'w-72 sm:w-80 h-full flex flex-col bg-white/95 dark:bg-blueprint-nightCard/95 border-l border-blueprint-creamBorder dark:border-blueprint-nightBorder select-none shadow-sm'
-    : 'w-full flex flex-col bg-white/95 dark:bg-blueprint-nightCard/95 border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder select-none';
+  const containerClasses = `${
+    isDocked
+      ? 'w-72 sm:w-80 h-full flex flex-col bg-white/95 dark:bg-blueprint-nightCard/95 border-l border-blueprint-creamBorder dark:border-blueprint-nightBorder select-none shadow-sm'
+      : 'w-full flex flex-col bg-white/95 dark:bg-blueprint-nightCard/95 border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder select-none'
+  } ${className}`;
 
   return (
     <div className={containerClasses}>
@@ -155,18 +162,34 @@ export const CircuitCheckPanel: React.FC<CircuitCheckPanelProps> = ({
           </span>
         </div>
 
-        <button
-          aria-label="Toggle Circuit Check Panel"
-          className="text-gray-400 hover:text-blueprint-navy dark:hover:text-white p-1 rounded-lg flex-shrink-0 ml-1"
-        >
-          {isDocked ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : internalExpanded ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
+        <div className="flex items-center gap-1">
+          {onClose && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              aria-label="Close Circuit Check Panel"
+              className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition"
+              title="Close panel"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-        </button>
+
+          <button
+            aria-label="Toggle Circuit Check Panel"
+            className="text-gray-400 hover:text-blueprint-navy dark:hover:text-white p-1 rounded-lg flex-shrink-0"
+          >
+            {isDocked ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : internalExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Panel Scrollable Body */}

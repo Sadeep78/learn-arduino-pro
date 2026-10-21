@@ -10,7 +10,13 @@ import {
   CheckCircle2,
   Sliders,
   ChevronRight,
-  GripVertical
+  GripVertical,
+  LayoutGrid,
+  Columns,
+  Layers,
+  ShieldAlert,
+  Play,
+  Square
 } from 'lucide-react';
 import { CircuitCanvas } from '../components/canvas/CircuitCanvas';
 import { ComponentPalette } from '../components/canvas/ComponentPalette';
@@ -21,19 +27,34 @@ import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUIStore } from '../store/useUIStore';
 import { LESSONS } from '../data/lessons';
 
+export type SimulatorLayoutMode = 'circuit' | 'split' | 'code';
+
 export const SimulatorView: React.FC = () => {
   const { activeLessonId, setActiveLessonId } = useUIStore();
-  const { circuit, activeCode, loadCircuit } = useSimulatorStore();
+  const {
+    circuit,
+    activeCode,
+    loadCircuit,
+    isRunning,
+    startSimulation,
+    stopSimulation,
+    checklist,
+    isShortCircuit
+  } = useSimulatorStore();
 
   const activeLesson = LESSONS.find((l) => l.id === activeLessonId) || LESSONS[0];
 
+  // View layout mode: 'circuit' (canvas-only), 'split' (canvas + code), or 'code' (code-only)
+  const [layoutMode, setLayoutMode] = useState<SimulatorLayoutMode>('split');
+
   // Resizable split layout state (percentage of width for canvas studio)
-  const [canvasWidthPercent, setCanvasWidthPercent] = useState<number>(60);
+  const [canvasWidthPercent, setCanvasWidthPercent] = useState<number>(55);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  // Collapsible panels
-  const [isCheckPanelCollapsed, setIsCheckPanelCollapsed] = useState<boolean>(false);
+  // Drawer states
+  const [isPaletteOpen, setIsPaletteOpen] = useState<boolean>(true);
+  const [isCheckPanelOpen, setIsCheckPanelOpen] = useState<boolean>(true);
   const [isSerialMonitorOpen, setIsSerialMonitorOpen] = useState<boolean>(true);
 
   // Lesson change confirmation dialog
@@ -42,20 +63,19 @@ export const SimulatorView: React.FC = () => {
 
   // Synchronize on mount if simulator circuit doesn't match active lesson
   useEffect(() => {
-    // If on initial load circuit is empty or mismatched, load current lesson starter
     if (circuit.components.length === 0) {
       loadCircuit(activeLesson.initialCircuit, activeLesson.codeSnippet);
     }
   }, []);
 
-  // Handle drag resizing
+  // Handle drag resizing between canvas and code columns in split mode
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing || !splitContainerRef.current) return;
       const rect = splitContainerRef.current.getBoundingClientRect();
       const newPercent = ((e.clientX - rect.left) / rect.width) * 100;
-      // Clamp between 35% and 75%
-      setCanvasWidthPercent(Math.min(75, Math.max(35, Math.round(newPercent))));
+      // Clamp between 30% and 70%
+      setCanvasWidthPercent(Math.min(70, Math.max(30, Math.round(newPercent))));
     };
 
     const handleMouseUp = () => {
@@ -110,143 +130,254 @@ export const SimulatorView: React.FC = () => {
     }
   };
 
+  // Checklist statistics for header pill
+  const totalChecks = checklist.length;
+  const passCount = checklist.filter((item) => item.status === 'pass').length;
+  const failCount = checklist.filter((item) => item.status === 'fail').length;
+  const isAllPassed = totalChecks > 0 && failCount === 0 && !isShortCircuit;
+
   return (
-    <div className="space-y-3 select-none">
-      {/* Top Controls: Lesson Selector Bar */}
-      <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-blueprint-nightCard/90 border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        {/* Left: Lesson Selector & Dropdown */}
-        <div className="flex items-center gap-2.5 flex-wrap flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blueprint-teal/10 text-blueprint-teal text-xs font-mono font-bold">
-            <BookOpen className="w-4 h-4" />
-            <span>CURRICULUM</span>
+    <div className="space-y-2.5 select-none w-full">
+      {/* Top Controls Bar: Curriculum, View Mode Tabs, Drawers Toggles & Global Simulation Run */}
+      <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-blueprint-nightCard/95 border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5">
+        {/* Left: Lesson Selector & Reset */}
+        <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blueprint-teal/10 text-blueprint-teal text-xs font-mono font-bold flex-shrink-0">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">CURRICULUM</span>
           </div>
 
-          <div className="relative flex-1 sm:max-w-md min-w-[240px]">
+          <div className="relative flex-1 sm:max-w-xs min-w-[200px]">
             <select
               value={activeLessonId}
               onChange={(e) => handleSelectLesson(e.target.value)}
-              className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl bg-blueprint-creamDark/70 dark:bg-blueprint-nightBg/70 border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold text-blueprint-navy dark:text-gray-100 focus:outline-none focus:border-blueprint-teal cursor-pointer"
+              className="w-full appearance-none pl-3 pr-8 py-1.5 rounded-xl bg-blueprint-creamDark/70 dark:bg-blueprint-nightBg/70 border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold text-blueprint-navy dark:text-gray-100 focus:outline-none focus:border-blueprint-teal cursor-pointer"
             >
               {LESSONS.map((l) => (
                 <option key={l.id} value={l.id}>
-                  Lesson #{String(l.number).padStart(2, '0')}: {l.title} ({l.categoryLabel})
+                  Lesson #{String(l.number).padStart(2, '0')}: {l.title}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs font-mono text-gray-500">
-            <span>+{activeLesson.xpReward} XP</span>
-            <span>·</span>
-            <span className="capitalize">{activeLesson.difficulty}</span>
-          </div>
-        </div>
-
-        {/* Right: Reset Starter Circuit Button */}
-        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleResetToStarter}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blueprint-creamDark dark:bg-blueprint-nightBg border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal transition"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blueprint-creamDark dark:bg-blueprint-nightBg border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal transition flex-shrink-0"
             title="Reset circuit and sketch to lesson initial starter state"
           >
             <RotateCcw className="w-3.5 h-3.5 text-blueprint-teal" />
-            <span>Reset to Starter</span>
+            <span className="hidden sm:inline">Reset</span>
           </button>
+        </div>
+
+        {/* Center: View Mode Switcher Tabs */}
+        <div className="flex items-center justify-center p-1 rounded-xl bg-blueprint-creamDark/80 dark:bg-blueprint-nightBg/80 border border-blueprint-creamBorder dark:border-blueprint-nightBorder self-center flex-shrink-0">
+          <button
+            onClick={() => setLayoutMode('circuit')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${
+              layoutMode === 'circuit'
+                ? 'bg-blueprint-teal text-white shadow-xs'
+                : 'text-blueprint-navy dark:text-gray-300 hover:text-blueprint-teal'
+            }`}
+            title="Full Circuit Canvas View"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Circuit</span>
+          </button>
+
+          <button
+            onClick={() => setLayoutMode('split')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${
+              layoutMode === 'split'
+                ? 'bg-blueprint-teal text-white shadow-xs'
+                : 'text-blueprint-navy dark:text-gray-300 hover:text-blueprint-teal'
+            }`}
+            title="Split Studio (Canvas + Code)"
+          >
+            <Columns className="w-3.5 h-3.5" />
+            <span>Split</span>
+          </button>
+
+          <button
+            onClick={() => setLayoutMode('code')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${
+              layoutMode === 'code'
+                ? 'bg-blueprint-teal text-white shadow-xs'
+                : 'text-blueprint-navy dark:text-gray-300 hover:text-blueprint-teal'
+            }`}
+            title="Code Editor & Telemetry View"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Code</span>
+          </button>
+        </div>
+
+        {/* Right: Drawer Toggles & Run Simulation */}
+        <div className="flex items-center gap-2 flex-wrap justify-end flex-shrink-0">
+          {layoutMode !== 'code' && (
+            <button
+              onClick={() => setIsPaletteOpen(!isPaletteOpen)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition ${
+                isPaletteOpen
+                  ? 'bg-blueprint-teal text-white border-blueprint-teal'
+                  : 'bg-blueprint-creamDark dark:bg-blueprint-nightBg border-blueprint-creamBorder dark:border-blueprint-nightBorder text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal'
+              }`}
+              title="Toggle Component Palette"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Components</span>
+            </button>
+          )}
+
+          {layoutMode !== 'code' && (
+            <button
+              onClick={() => setIsCheckPanelOpen(!isCheckPanelOpen)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition ${
+                isCheckPanelOpen ? 'ring-2 ring-blueprint-teal' : ''
+              } ${
+                isShortCircuit
+                  ? 'bg-red-500 text-white border-red-600 animate-pulse'
+                  : isAllPassed
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                  : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'
+              }`}
+              title="Toggle Circuit Check Panel"
+            >
+              {isShortCircuit ? (
+                <ShieldAlert className="w-3.5 h-3.5 text-white" />
+              ) : isAllPassed ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              ) : (
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+              )}
+              <span>Circuit Check ({passCount}/{totalChecks})</span>
+            </button>
+          )}
+
+          {/* Primary Simulation Run/Stop Button */}
+          {isRunning ? (
+            <button
+              onClick={stopSimulation}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-mono font-bold text-xs shadow-md transition"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span>STOP</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => startSimulation()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blueprint-teal hover:bg-blueprint-tealHover text-white font-mono font-bold text-xs shadow-md shadow-blueprint-teal/30 transition"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>RUN SIMULATION</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Main Resizable Split Studio: Canvas Studio | Code & Serial Studio */}
+      {/* Main Studio Viewport */}
       <div
         ref={splitContainerRef}
-        className="flex flex-col lg:flex-row rounded-2xl overflow-hidden border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-blueprint bg-white/70 dark:bg-blueprint-nightCard/70 backdrop-blur-md min-h-[640px]"
+        className="flex flex-col lg:flex-row rounded-2xl overflow-hidden border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-blueprint bg-white/80 dark:bg-blueprint-nightCard/80 backdrop-blur-md min-h-[640px] relative"
       >
-        {/* Left Side: Canvas Studio (Palette + Canvas Workspace + Docked Circuit Check) */}
-        <div
-          style={{ width: `${canvasWidthPercent}%` }}
-          className="flex flex-col min-w-0 max-lg:!w-full border-r border-blueprint-creamBorder dark:border-blueprint-nightBorder"
-        >
-          <div className="flex-1 flex flex-col lg:flex-row min-h-0 relative">
-            {/* Palette */}
-            <ComponentPalette />
+        {/* Canvas Studio Container (Rendered when in 'circuit' or 'split' mode) */}
+        {layoutMode !== 'code' && (
+          <div
+            style={{ width: layoutMode === 'split' ? `${canvasWidthPercent}%` : '100%' }}
+            className={`flex flex-col min-w-0 max-lg:!w-full relative h-[640px] ${
+              layoutMode === 'split' ? 'border-r border-blueprint-creamBorder dark:border-blueprint-nightBorder' : ''
+            }`}
+          >
+            {/* Component Palette Slide-over Drawer (Left) */}
+            {isPaletteOpen && (
+              <div className="absolute top-0 left-0 bottom-0 z-30 flex animate-in slide-in-from-left-2 duration-200 shadow-2xl">
+                <ComponentPalette
+                  isOpen={isPaletteOpen}
+                  onClose={() => setIsPaletteOpen(false)}
+                />
+              </div>
+            )}
 
-            {/* Canvas Workspace: Takes remaining width dynamically */}
-            <div className="flex-1 min-w-0 relative">
+            {/* Main Canvas Workspace: Full width and height of container */}
+            <div className="flex-1 w-full h-full relative">
               <CircuitCanvas />
             </div>
 
-            {/* Docked Right Panel: Circuit Check (Desktop >= 1024px) */}
-            <div className="hidden lg:flex flex-shrink-0">
-              <CircuitCheckPanel
-                isDocked={true}
-                isCollapsed={isCheckPanelCollapsed}
-                onToggleCollapse={() => setIsCheckPanelCollapsed(!isCheckPanelCollapsed)}
-              />
-            </div>
-          </div>
-
-          {/* Bottom Drawer on screens < 1024px */}
-          <div className="lg:hidden border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder">
-            <CircuitCheckPanel isDocked={false} />
-          </div>
-        </div>
-
-        {/* Draggable Vertical Resizer Bar (Desktop only) */}
-        <div
-          onMouseDown={() => setIsResizing(true)}
-          className={`hidden lg:flex w-2.5 items-center justify-center bg-blueprint-creamDark/60 dark:bg-blueprint-nightBg/60 hover:bg-blueprint-teal/40 cursor-col-resize transition-colors select-none flex-shrink-0 ${
-            isResizing ? 'bg-blueprint-teal text-white' : 'text-gray-400'
-          }`}
-          title="Drag to resize Canvas and Code Editor columns"
-        >
-          <GripVertical className="w-3 h-3 opacity-60" />
-        </div>
-
-        {/* Right Side: Code & Telemetry Studio (Editor + Collapsible Serial Monitor) */}
-        <div
-          style={{ width: `${100 - canvasWidthPercent}%` }}
-          className="flex flex-col min-w-0 max-lg:!w-full h-[620px] lg:h-auto bg-[#1E1E1E]"
-        >
-          {/* Top: Code Editor */}
-          <div className="flex-1 min-h-0 relative overflow-hidden">
-            <CodeEditor />
-          </div>
-
-          {/* Bottom: Collapsible Serial Monitor Panel */}
-          <div className="border-t border-[#333333] flex flex-col flex-shrink-0 bg-[#1E1E1E]">
-            {/* Collapsible Header Toggle */}
-            <div
-              onClick={() => setIsSerialMonitorOpen(!isSerialMonitorOpen)}
-              className="h-9 px-3 bg-[#252526] hover:bg-[#2A2D2E] cursor-pointer flex items-center justify-between border-b border-[#333333] transition"
-            >
-              <div className="flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-blueprint-teal" />
-                <span className="font-mono text-xs font-bold text-gray-200">
-                  Serial Monitor & Telemetry
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-1" />
-              </div>
-
-              <button
-                className="text-gray-400 hover:text-gray-200 p-0.5"
-                title={isSerialMonitorOpen ? 'Collapse Serial Monitor' : 'Expand Serial Monitor'}
-              >
-                {isSerialMonitorOpen ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronUp className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-
-            {/* Serial Monitor Body */}
-            {isSerialMonitorOpen && (
-              <div className="h-44 sm:h-52 overflow-hidden">
-                <SerialMonitor />
+            {/* Circuit Check Slide-over Drawer (Right) */}
+            {isCheckPanelOpen && (
+              <div className="absolute top-0 right-0 bottom-0 z-30 w-80 sm:w-96 flex animate-in slide-in-from-right-2 duration-200 shadow-2xl">
+                <CircuitCheckPanel
+                  isDocked={false}
+                  onClose={() => setIsCheckPanelOpen(false)}
+                  className="h-full rounded-l-2xl border-l shadow-2xl"
+                />
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Draggable Vertical Resizer Bar (Visible only in Split mode on desktop) */}
+        {layoutMode === 'split' && (
+          <div
+            onMouseDown={() => setIsResizing(true)}
+            className={`hidden lg:flex w-2 items-center justify-center bg-blueprint-creamDark/60 dark:bg-blueprint-nightBg/60 hover:bg-blueprint-teal/40 cursor-col-resize transition-colors select-none flex-shrink-0 ${
+              isResizing ? 'bg-blueprint-teal text-white' : 'text-gray-400'
+            }`}
+            title="Drag to resize Canvas and Code columns"
+          >
+            <GripVertical className="w-3 h-3 opacity-60" />
+          </div>
+        )}
+
+        {/* Code & Telemetry Studio (Rendered when in 'split' or 'code' mode) */}
+        {layoutMode !== 'circuit' && (
+          <div
+            style={{ width: layoutMode === 'split' ? `${100 - canvasWidthPercent}%` : '100%' }}
+            className="flex flex-col min-w-0 max-lg:!w-full h-[640px] bg-[#1E1E1E]"
+          >
+            {/* Top: Code Editor */}
+            <div className="flex-1 min-h-0 relative overflow-hidden">
+              <CodeEditor />
+            </div>
+
+            {/* Bottom: Collapsible Serial Monitor Panel */}
+            <div className="border-t border-[#333333] flex flex-col flex-shrink-0 bg-[#1E1E1E]">
+              {/* Header Toggle */}
+              <div
+                onClick={() => setIsSerialMonitorOpen(!isSerialMonitorOpen)}
+                className="h-9 px-3 bg-[#252526] hover:bg-[#2A2D2E] cursor-pointer flex items-center justify-between border-b border-[#333333] transition"
+              >
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-3.5 h-3.5 text-blueprint-teal" />
+                  <span className="font-mono text-xs font-bold text-gray-200">
+                    Serial Monitor & Telemetry
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-1" />
+                </div>
+
+                <button
+                  className="text-gray-400 hover:text-gray-200 p-0.5"
+                  title={isSerialMonitorOpen ? 'Collapse Serial Monitor' : 'Expand Serial Monitor'}
+                >
+                  {isSerialMonitorOpen ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+
+              {/* Serial Monitor Body */}
+              {isSerialMonitorOpen && (
+                <div className="h-44 sm:h-52 overflow-hidden">
+                  <SerialMonitor />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Confirmation Modal when switching lessons or resetting modified circuit */}

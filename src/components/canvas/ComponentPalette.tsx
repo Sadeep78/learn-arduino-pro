@@ -13,7 +13,8 @@ import {
   Tv,
   Hash,
   Search,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 import { ComponentType } from '../../types/simulator';
 import { useSimulatorStore } from '../../store/useSimulatorStore';
@@ -25,9 +26,21 @@ interface PaletteItem {
   icon: React.ElementType;
 }
 
-export const ComponentPalette: React.FC = () => {
+interface ComponentPaletteProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  className?: string;
+}
+
+export const ComponentPalette: React.FC<ComponentPaletteProps> = ({
+  isOpen = true,
+  onClose,
+  className = ''
+}) => {
   const { addComponent } = useSimulatorStore();
   const [search, setSearch] = useState('');
+
+  if (!isOpen) return null;
 
   const items: PaletteItem[] = [
     { type: 'arduino_uno', label: 'Arduino Uno R3', category: 'Boards', icon: Cpu },
@@ -57,14 +70,28 @@ export const ComponentPalette: React.FC = () => {
   };
 
   return (
-    <div className="w-56 flex flex-col bg-blueprint-cream/90 dark:bg-blueprint-nightCard/95 border-r border-blueprint-creamBorder dark:border-blueprint-nightBorder p-3 select-none">
+    <div
+      className={`w-60 flex flex-col bg-white/95 dark:bg-blueprint-nightCard/95 backdrop-blur-md border-r border-blueprint-creamBorder dark:border-blueprint-nightBorder p-3 select-none z-30 shadow-md ${className}`}
+    >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-mono font-bold text-blueprint-teal uppercase tracking-wider">
-          COMPONENTS
-        </span>
-        <span className="text-[10px] font-mono text-gray-400">
-          {filtered.length} parts
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-mono font-bold text-blueprint-teal uppercase tracking-wider">
+            COMPONENTS
+          </span>
+          <span className="text-[10px] font-mono text-gray-400">
+            ({filtered.length})
+          </span>
+        </div>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-gray-400 hover:text-blueprint-navy dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition"
+            title="Collapse Component Palette"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Search Input */}

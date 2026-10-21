@@ -48,11 +48,13 @@ export const App: React.FC = () => {
         <Sidebar />
 
         {/* Main Application Viewport */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 relative">
+        <main className={`flex-1 overflow-y-auto relative ${
+          activeNav === 'simulator' ? 'px-2 sm:px-4 py-3' : 'px-4 sm:px-6 lg:px-8 py-6'
+        }`}>
           {/* Blueprint subtle engineering grid pattern background */}
           <div className="absolute inset-0 blueprint-grid opacity-35 pointer-events-none -z-10" />
 
-          <div className="max-w-7xl mx-auto space-y-6">
+          <div className={activeNav === 'simulator' ? 'w-full space-y-3' : 'max-w-7xl mx-auto space-y-6'}>
             {activeNav === 'home' && <HomeView />}
             {activeNav === 'lessons' && <LessonsView />}
             {activeNav === 'simulator' && <SimulatorView />}

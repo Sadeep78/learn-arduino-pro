@@ -408,9 +408,9 @@ export const CircuitCanvas: React.FC = () => {
       <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" />
 
       {/* Top Canvas Toolbar */}
-      <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none gap-2 flex-wrap">
+      <div className="absolute top-2.5 left-2.5 right-2.5 z-30 flex items-center justify-between pointer-events-none gap-2 flex-nowrap overflow-x-auto no-scrollbar">
         {/* Left Action Buttons: Undo, Redo, Rotate, Delete */}
-        <div className="flex items-center gap-1.5 pointer-events-auto bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md p-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
+        <div className="flex items-center gap-1 pointer-events-auto bg-white/95 dark:bg-blueprint-nightCard/95 backdrop-blur-md p-1 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm flex-shrink-0">
           <button
             onClick={undo}
             disabled={past.length === 0}
@@ -429,7 +429,7 @@ export const CircuitCanvas: React.FC = () => {
             <Redo2 className="w-4 h-4" />
           </button>
 
-          <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
+          <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-0.5" />
 
           {selectedComponentId && (
             <>
@@ -463,15 +463,15 @@ export const CircuitCanvas: React.FC = () => {
         </div>
 
         {/* Center: Wire Color Selector + Pan & Zoom Tools */}
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-1.5 pointer-events-auto flex-shrink-0">
           {/* Wire Color Selector */}
-          <div className="hidden sm:flex items-center gap-1 bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
-            <Palette className="w-3.5 h-3.5 text-gray-400 mr-1" />
+          <div className="hidden sm:flex items-center gap-1 bg-white/95 dark:bg-blueprint-nightCard/95 backdrop-blur-md px-2 py-1 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
+            <Palette className="w-3.5 h-3.5 text-gray-400 mr-0.5" />
             {wireColors.map((wc) => (
               <button
                 key={wc.hex}
                 onClick={() => setWireColor(wc.hex)}
-                className={`w-4 h-4 rounded-full border transition-all ${
+                className={`w-3.5 h-3.5 rounded-full border transition-all ${
                   wireColor === wc.hex ? 'scale-125 ring-2 ring-blueprint-teal' : 'hover:scale-110'
                 }`}
                 style={{ backgroundColor: wc.hex }}
@@ -481,17 +481,17 @@ export const CircuitCanvas: React.FC = () => {
           </div>
 
           {/* Pan & Zoom Controls */}
-          <div className="flex items-center gap-1 bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md px-2 py-1 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
+          <div className="flex items-center gap-0.5 bg-white/95 dark:bg-blueprint-nightCard/95 backdrop-blur-md px-1.5 py-1 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
             <button
               onClick={handleFitToView}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
               title="Fit all components to view"
             >
               <Maximize2 className="w-3.5 h-3.5 text-blueprint-teal" />
               <span className="hidden md:inline">Fit to view</span>
             </button>
 
-            <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-0.5" />
+            <div className="w-[1px] h-3.5 bg-gray-300 dark:bg-gray-700 mx-0.5" />
 
             <button
               onClick={() => setZoom((z) => Math.max(0.4, Number((z - 0.1).toFixed(2))))}
@@ -501,7 +501,7 @@ export const CircuitCanvas: React.FC = () => {
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
 
-            <span className="text-[11px] font-mono font-bold text-gray-500 w-10 text-center">
+            <span className="text-[10px] font-mono font-bold text-gray-500 w-9 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
@@ -516,19 +516,19 @@ export const CircuitCanvas: React.FC = () => {
         </div>
 
         {/* Right: Simulation Run/Stop Toggle, Auto-Wire & Show Wiring */}
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-1.5 pointer-events-auto flex-shrink-0">
           {/* Show me the wiring button */}
           {activeLesson?.requiredCircuit && activeLesson.requiredCircuit.connections.length > 0 && (
             <button
               onClick={() => setShowWiringGuide(!showWiringGuide)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-mono font-bold text-xs shadow-md transition ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-xl font-mono font-bold text-xs shadow-sm transition ${
                 showWiringGuide
                   ? 'bg-cyan-500 hover:bg-cyan-600 text-white ring-2 ring-cyan-300 shadow-cyan-500/30'
-                  : 'bg-white/90 dark:bg-blueprint-nightCard/90 text-blueprint-navy dark:text-gray-200 hover:text-cyan-600 border border-blueprint-creamBorder dark:border-blueprint-nightBorder'
+                  : 'bg-white/95 dark:bg-blueprint-nightCard/95 text-blueprint-navy dark:text-gray-200 hover:text-cyan-600 border border-blueprint-creamBorder dark:border-blueprint-nightBorder'
               }`}
               title="Show animated wiring connections overlay for this lesson"
             >
-              {showWiringGuide ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showWiringGuide ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{showWiringGuide ? 'Hide Wiring' : 'Show Wiring'}</span>
             </button>
           )}
@@ -536,29 +536,11 @@ export const CircuitCanvas: React.FC = () => {
           {canAutoWire && (
             <button
               onClick={autoWireLed}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-mono font-bold text-xs shadow-lg shadow-amber-500/20 transition animate-pulse"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-mono font-bold text-xs shadow-sm shadow-amber-500/20 transition animate-pulse"
               title="Automatically connect Pin 13 to LED Anode and GND to Cathode"
             >
-              <Zap className="w-4 h-4 fill-current" />
-              <span>⚡ Auto-Wire LED</span>
-            </button>
-          )}
-
-          {isRunning ? (
-            <button
-              onClick={stopSimulation}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-mono font-bold text-xs shadow-lg transition"
-            >
-              <Square className="w-4 h-4 fill-current" />
-              <span>STOP</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => startSimulation()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blueprint-teal hover:bg-blueprint-tealHover text-white font-mono font-bold text-xs shadow-lg shadow-blueprint-teal/30 transition"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>RUN SIMULATION</span>
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>⚡ Auto-Wire</span>
             </button>
           )}
         </div>
