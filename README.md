@@ -16,10 +16,6 @@
 
 [✨ GitHub Repository](https://github.com/Sadeep78/learn-arduino-pro) • [📖 Documentation](#-curriculum--learning-path) • [🛠️ Circuit Simulator](#-in-browser-circuit-simulator) • [💡 Component Catalog](#-simulated-electronics-library) • [📜 License](LICENSE)
 
----
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSadeep78%2Flearn-arduino-pro)
-
 </div>
 
 <br/>
@@ -42,7 +38,6 @@
 - [🚀 Quick Start Guide](#-quick-start-guide)
 - [🔑 Environment Variables](#-environment-variables)
 - [🧪 Running Tests & Build](#-running-tests--build)
-- [☁️ Vercel Deployment](#️-vercel-deployment)
 - [🤝 Contributing](#-contributing)
 - [📜 License & Credits](#-license--credits)
 
@@ -304,20 +299,6 @@ Generates an optimized, tree-shaken production distribution in `./dist` with PWA
 ```bash
 npm run preview
 ```
-
----
-
-## ☁️ Vercel Deployment
-
-Deploying **Learn Arduino Pro** to Vercel takes less than a minute:
-
-1. Push your repository to GitHub.
-2. Click the button below or import your repo in the [Vercel Dashboard](https://vercel.com):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSadeep78%2Flearn-arduino-pro)
-
-3. Set `ANTHROPIC_API_KEY` under **Project Settings > Environment Variables** (optional).
-4. The included `vercel.json` will automatically configure API route rewrites and Single Page Application (SPA) routing.
 
 ---
 
