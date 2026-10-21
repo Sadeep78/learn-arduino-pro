@@ -25,7 +25,17 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
     orange: '#F97316'
   };
 
+  // Realistic unlit epoxy colors when LED is OFF (dark, no white glow)
+  const unlitColorMap: Record<string, { bg: string; border: string }> = {
+    red: { bg: '#450A0A', border: '#7F1D1D' },
+    green: { bg: '#052E16', border: '#14532D' },
+    blue: { bg: '#0F172A', border: '#1E3A8A' },
+    yellow: { bg: '#451A03', border: '#78350F' },
+    orange: { bg: '#431407', border: '#7C2D12' }
+  };
+
   const hexColor = colorHexMap[color] || '#EF4444';
+  const unlitStyle = unlitColorMap[color] || unlitColorMap.red;
   const isGlowing = brightness > 0.05;
 
   return (
@@ -37,7 +47,7 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
     >
       {/* 5mm Dome LED Lens */}
       <div className="relative flex items-center justify-center">
-        {/* Glow halo when on */}
+        {/* Glow halo ONLY when on */}
         {isGlowing && (
           <div
             className="absolute rounded-full pointer-events-none transition-all duration-150 animate-pulse"
@@ -45,7 +55,7 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
               width: `${40 + brightness * 30}px`,
               height: `${40 + brightness * 30}px`,
               backgroundColor: hexColor,
-              opacity: brightness * 0.7,
+              opacity: brightness * 0.75,
               filter: 'blur(10px)'
             }}
           />
@@ -53,14 +63,26 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
 
         {/* LED Plastic Dome */}
         <div
-          className="w-10 h-10 rounded-full border-2 border-white/60 shadow-lg relative flex items-center justify-center transition-all duration-150"
+          className={`w-10 h-10 rounded-full relative flex items-center justify-center transition-all duration-150 border-2 ${
+            isGlowing ? 'border-white/80 shadow-lg' : 'border-black/60 shadow-inner'
+          }`}
           style={{
-            backgroundColor: isGlowing ? hexColor : '#374151',
-            boxShadow: isGlowing ? `0 0 15px ${hexColor}` : 'none'
+            backgroundColor: isGlowing ? hexColor : unlitStyle.bg,
+            borderColor: isGlowing ? 'rgba(255, 255, 255, 0.85)' : unlitStyle.border,
+            boxShadow: isGlowing
+              ? `0 0 16px ${hexColor}, inset 0 0 6px rgba(255, 255, 255, 0.5)`
+              : 'inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4)'
           }}
         >
-          {/* Internal filament reflex */}
-          <div className="w-3 h-3 rounded-full bg-white/40" />
+          {/* Internal filament/die: glowing white when on, dark metallic die when off */}
+          {isGlowing ? (
+            <div className="w-3.5 h-3.5 rounded-full bg-white/90 shadow-md animate-pulse" />
+          ) : (
+            <div className="relative w-3 h-2.5 flex items-center justify-center opacity-60">
+              <div className="w-1.5 h-2 bg-black/80 rounded-t-sm" />
+              <div className="w-2.5 h-1 bg-black/90 rounded-sm -ml-0.5" />
+            </div>
+          )}
         </div>
       </div>
 

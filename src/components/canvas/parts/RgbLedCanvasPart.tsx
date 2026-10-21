@@ -14,9 +14,10 @@ export const RgbLedCanvasPart: React.FC<RgbLedPartProps> = ({
   onPinClick,
   activeWiringPin
 }) => {
-  const r = component.properties?.r ?? 255;
+  const r = component.properties?.r ?? 0;
   const g = component.properties?.g ?? 0;
   const b = component.properties?.b ?? 0;
+  const isGlowing = r > 15 || g > 15 || b > 15;
 
   return (
     <div
@@ -27,13 +28,21 @@ export const RgbLedCanvasPart: React.FC<RgbLedPartProps> = ({
     >
       {/* 5mm Diffused RGB Lens */}
       <div
-        className="w-12 h-12 rounded-full border-2 border-white/80 shadow-lg flex items-center justify-center transition-all duration-150"
+        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-150 border-2 ${
+          isGlowing ? 'border-white/80 shadow-lg' : 'border-black/60 shadow-inner'
+        }`}
         style={{
-          backgroundColor: `rgb(${r}, ${g}, ${b})`,
-          boxShadow: `0 0 20px rgba(${r}, ${g}, ${b}, 0.7)`
+          backgroundColor: isGlowing ? `rgb(${r}, ${g}, ${b})` : '#1E293B',
+          boxShadow: isGlowing
+            ? `0 0 20px rgba(${r}, ${g}, ${b}, 0.8), inset 0 0 6px rgba(255, 255, 255, 0.5)`
+            : 'inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4)'
         }}
       >
-        <div className="w-3 h-3 rounded-full bg-white/50" />
+        {isGlowing ? (
+          <div className="w-3.5 h-3.5 rounded-full bg-white/80 shadow-md animate-pulse" />
+        ) : (
+          <div className="w-2.5 h-2.5 rounded-full bg-black/60 opacity-60" />
+        )}
       </div>
 
       {/* 4 Leads: R, Cathode (-), G, B */}
