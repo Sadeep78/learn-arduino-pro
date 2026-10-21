@@ -3,13 +3,19 @@ import { parseChapters, matchLessonId, CHAPTERS_RAW, ARDUINO_BEGINNER_VIDEO } fr
 import { formatTime } from '../src/components/video/VideoPlayer';
 
 describe('Videos Data & Chapter Parser', () => {
-  it('returns single "Full video" chapter when CHAPTERS_RAW is placeholder', () => {
-    const chapters = parseChapters(CHAPTERS_RAW);
+  it('returns single "Full video" chapter when raw text is placeholder without timestamps', () => {
+    const chapters = parseChapters('https://www.youtube.com/watch?v=zJ-LqeX_fLU');
     expect(chapters.length).toBe(1);
     expect(chapters[0].title).toBe('Full video');
     expect(chapters[0].time).toBe(0);
     expect(chapters[0].summary).toBe('Chapters not added yet');
     expect(chapters[0].lessonId).toBeUndefined();
+  });
+
+  it('correctly parses full course chapters from CHAPTERS_RAW', () => {
+    const chapters = parseChapters(CHAPTERS_RAW);
+    expect(chapters.length).toBeGreaterThan(50);
+    expect(chapters[0].title).toContain('Objective of the course');
   });
 
   it('correctly parses MM:SS and HH:MM:SS timestamps to seconds', () => {
