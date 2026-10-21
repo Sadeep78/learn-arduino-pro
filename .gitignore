@@ -30,3 +30,8 @@ pnpm-debug.log*
 *.sln
 *.sw?
 .DS_Store
+
+# Test Results & Artifacts
+test-results/
+playwright-report/
+blob-report/

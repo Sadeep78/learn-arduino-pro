@@ -25,7 +25,8 @@ export const TopBar: React.FC = () => {
     toggleTheme,
     isTutorOpen,
     setIsTutorOpen,
-    setMobileDrawerOpen
+    setMobileDrawerOpen,
+    setActiveNav
   } = useUIStore();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -200,14 +201,19 @@ export const TopBar: React.FC = () => {
         </button>
 
         {/* User Profile / Guest Badge */}
-        <div className="flex items-center gap-2 pl-1">
+        <button
+          onClick={() => setActiveNav('settings')}
+          className="flex items-center gap-2 pl-1 hover:opacity-80 transition cursor-pointer text-left"
+          title="Account & Settings"
+          aria-label="Account Settings"
+        >
           <div className="w-8 h-8 rounded-xl bg-blueprint-navy text-white flex items-center justify-center font-bold text-xs shadow border border-blueprint-teal/40">
             <User className="w-4 h-4 text-blueprint-teal" />
           </div>
           <span className="hidden xl:inline text-xs font-mono font-medium text-blueprint-navy dark:text-gray-300">
             {displayName}
           </span>
-        </div>
+        </button>
       </div>
     </header>
   );

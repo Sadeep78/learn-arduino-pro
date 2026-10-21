@@ -95,77 +95,95 @@ export const ProjectsView: React.FC = () => {
         </div>
       )}
 
-      {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {projects.map((proj) => (
-          <div
-            key={proj.id}
-            className="p-5 rounded-2xl bg-white/80 dark:bg-blueprint-nightCard/80 border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm flex flex-col justify-between hover:border-blueprint-teal transition-all group"
+      {/* Projects Grid / Empty State */}
+      {projects.length === 0 ? (
+        <div className="p-12 text-center rounded-2xl bg-white/60 dark:bg-blueprint-nightCard/60 border border-dashed border-blueprint-creamBorder dark:border-blueprint-nightBorder flex flex-col items-center justify-center">
+          <FolderGit2 className="w-12 h-12 text-blueprint-teal/40 mb-3" />
+          <h3 className="text-sm font-mono font-bold text-blueprint-navy dark:text-white">
+            NO SAVED PROJECTS YET
+          </h3>
+          <p className="text-xs text-blueprint-navyMuted dark:text-gray-400 mt-1 max-w-sm">
+            Create custom circuits and sketches in the simulator, or import an existing JSON project bundle to get started.
+          </p>
+          <button
+            onClick={() => setActiveNav('simulator')}
+            className="mt-4 px-4 py-2 rounded-xl bg-blueprint-teal hover:bg-blueprint-tealHover text-white text-xs font-mono font-bold transition shadow-sm"
           >
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-gray-400">
-                  Updated: {proj.updatedAt}
-                </span>
-                <div className="flex items-center gap-1">
-                  {proj.tags.map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[9px] font-mono px-2 py-0.5 rounded bg-blueprint-creamDark dark:bg-blueprint-nightBg text-blueprint-navyMuted dark:text-gray-300"
-                    >
-                      {t}
-                    </span>
-                  ))}
+            Open Simulator
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((proj) => (
+            <div
+              key={proj.id}
+              className="p-5 rounded-2xl bg-white/80 dark:bg-blueprint-nightCard/80 border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm flex flex-col justify-between hover:border-blueprint-teal transition-all group"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-mono text-gray-400">
+                    Updated: {proj.updatedAt}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {proj.tags.map((t, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[9px] font-mono px-2 py-0.5 rounded bg-blueprint-creamDark dark:bg-blueprint-nightBg text-blueprint-navyMuted dark:text-gray-300"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+
+                <h3 className="text-base font-bold text-blueprint-navy dark:text-white group-hover:text-blueprint-teal transition-colors">
+                  {proj.title}
+                </h3>
+                <p className="text-xs text-blueprint-navyMuted dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                  {proj.description}
+                </p>
               </div>
 
-              <h3 className="text-base font-bold text-blueprint-navy dark:text-white group-hover:text-blueprint-teal transition-colors">
-                {proj.title}
-              </h3>
-              <p className="text-xs text-blueprint-navyMuted dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
-                {proj.description}
-              </p>
-            </div>
+              {/* Bottom Actions */}
+              <div className="mt-5 pt-3 border-t border-blueprint-creamBorder/70 dark:border-blueprint-nightBorder/70 flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => exportProjectJSON(proj.id)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
+                    title="Export JSON"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
 
-            {/* Bottom Actions */}
-            <div className="mt-5 pt-3 border-t border-blueprint-creamBorder/70 dark:border-blueprint-nightBorder/70 flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => exportProjectJSON(proj.id)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
-                  title="Export JSON"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
+                  <button
+                    onClick={() => duplicateProject(proj.id)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
+                    title="Duplicate Project"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => deleteProject(proj.id)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition"
+                    title="Delete Project"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
 
                 <button
-                  onClick={() => duplicateProject(proj.id)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
-                  title="Duplicate Project"
+                  onClick={() => handleOpenProject(proj)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blueprint-teal hover:bg-blueprint-tealHover text-white text-xs font-mono font-bold shadow-sm transition"
                 >
-                  <Copy className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => deleteProject(proj.id)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition"
-                  title="Delete Project"
-                >
-                  <Trash2 className="w-4 h-4" />
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Open Sim</span>
                 </button>
               </div>
-
-              <button
-                onClick={() => handleOpenProject(proj)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blueprint-teal hover:bg-blueprint-tealHover text-white text-xs font-mono font-bold shadow-sm transition"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Open Sim</span>
-              </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

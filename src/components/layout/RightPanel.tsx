@@ -13,6 +13,7 @@ import {
   Search
 } from 'lucide-react';
 import { useUIStore, RightPanelTab } from '../../store/useUIStore';
+import { useSimulatorStore } from '../../store/useSimulatorStore';
 import { HOTSPOTS } from '../3d/HotspotsData';
 import { ARDUINO_UNO_PINS, BOARD_SPECS } from '../../data/pinouts';
 
@@ -137,6 +138,7 @@ void loop() {
   };
 
   const handleLoadInSimulator = () => {
+    useSimulatorStore.getState().setActiveCode(codeString);
     setActiveNav('simulator');
   };
 

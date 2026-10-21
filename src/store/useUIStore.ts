@@ -16,6 +16,7 @@ export type RightPanelTab = 'overview' | 'pinout' | 'example' | 'specs';
 interface UIState {
   activeNav: NavItem;
   theme: 'light' | 'dark';
+  highContrast: boolean;
   sidebarCollapsed: boolean;
   selectedHotspot: string | null;
   rightPanelTab: RightPanelTab;
@@ -27,6 +28,7 @@ interface UIState {
   setActiveNav: (nav: NavItem) => void;
   toggleTheme: () => void;
   setTheme: (theme: 'light' | 'dark') => void;
+  toggleHighContrast: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebar: () => void;
   setSelectedHotspot: (hotspotId: string | null) => void;
@@ -41,6 +43,7 @@ interface UIState {
 export const useUIStore = create<UIState>((set) => ({
   activeNav: 'home',
   theme: (localStorage.getItem('arduino_pro_theme') as 'light' | 'dark') || 'light',
+  highContrast: localStorage.getItem('arduino_pro_high_contrast') === 'true',
   sidebarCollapsed: false,
   selectedHotspot: 'atmega328p',
   rightPanelTab: 'overview',
@@ -71,6 +74,17 @@ export const useUIStore = create<UIState>((set) => ({
     }
     set({ theme });
   },
+  toggleHighContrast: () =>
+    set((state) => {
+      const next = !state.highContrast;
+      localStorage.setItem('arduino_pro_high_contrast', String(next));
+      if (next) {
+        document.documentElement.classList.add('high-contrast');
+      } else {
+        document.documentElement.classList.remove('high-contrast');
+      }
+      return { highContrast: next };
+    }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   setSelectedHotspot: (hotspotId) => set({ selectedHotspot: hotspotId }),

@@ -81,33 +81,45 @@ export const ComponentPalette: React.FC = () => {
 
       {/* Component Cards List */}
       <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-        {filtered.map((item) => {
-          const Icon = item.icon;
-          return (
+        {filtered.length === 0 ? (
+          <div className="p-4 text-center text-gray-400">
+            <p className="text-xs font-mono">No parts found</p>
             <button
-              key={item.type}
-              onClick={() => handleAdd(item.type)}
-              className="w-full flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-blueprint-nightBg/70 border border-blueprint-creamBorder dark:border-blueprint-nightBorder hover:border-blueprint-teal hover:bg-white dark:hover:bg-blueprint-nightBg transition group text-left"
-              title={`Click to place ${item.label} on canvas`}
+              onClick={() => setSearch('')}
+              className="mt-2 text-[10px] font-mono text-blueprint-teal hover:underline"
             >
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blueprint-tealLight dark:bg-blueprint-teal/15 flex items-center justify-center text-blueprint-teal flex-shrink-0 group-hover:scale-110 transition">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col truncate">
-                  <span className="text-xs font-bold text-blueprint-navy dark:text-gray-200 truncate">
-                    {item.label}
-                  </span>
-                  <span className="text-[9px] font-mono text-gray-400">
-                    {item.category}
-                  </span>
-                </div>
-              </div>
-
-              <Plus className="w-3.5 h-3.5 text-gray-400 group-hover:text-blueprint-teal flex-shrink-0" />
+              Clear search
             </button>
-          );
-        })}
+          </div>
+        ) : (
+          filtered.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.type}
+                onClick={() => handleAdd(item.type)}
+                className="w-full flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-blueprint-nightBg/70 border border-blueprint-creamBorder dark:border-blueprint-nightBorder hover:border-blueprint-teal hover:bg-white dark:hover:bg-blueprint-nightBg transition group text-left"
+                title={`Click to place ${item.label} on canvas`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-blueprint-tealLight dark:bg-blueprint-teal/15 flex items-center justify-center text-blueprint-teal flex-shrink-0 group-hover:scale-110 transition">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col truncate">
+                    <span className="text-xs font-bold text-blueprint-navy dark:text-gray-200 truncate">
+                      {item.label}
+                    </span>
+                    <span className="text-[9px] font-mono text-gray-400">
+                      {item.category}
+                    </span>
+                  </div>
+                </div>
+
+                <Plus className="w-3.5 h-3.5 text-gray-400 group-hover:text-blueprint-teal flex-shrink-0" />
+              </button>
+            );
+          })
+        )}
       </div>
     </div>
   );

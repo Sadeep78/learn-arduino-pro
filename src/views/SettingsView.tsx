@@ -19,7 +19,7 @@ import { isSupabaseConfigured } from '../lib/supabase/client';
 
 export const SettingsView: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useUIStore();
+  const { theme, toggleTheme, highContrast, toggleHighContrast } = useUIStore();
   const { displayName, setDisplayName, resetProgress, xp, level } = useProgressStore();
 
   const [nameInput, setNameInput] = useState(displayName);
@@ -138,6 +138,27 @@ export const SettingsView: React.FC = () => {
               className="px-3 py-1.5 rounded-xl bg-white dark:bg-blueprint-nightCard border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold"
             >
               Toggle
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-xl bg-blueprint-creamDark/60 dark:bg-blueprint-nightBg/60 border border-blueprint-creamBorder/70 dark:border-blueprint-nightBorder/70">
+            <div>
+              <span className="text-xs font-bold text-blueprint-navy dark:text-white block font-mono">
+                High-Contrast Mode (WCAG AA)
+              </span>
+              <span className="text-[11px] text-gray-500">
+                {highContrast ? 'Enabled (Sharpened lines & text)' : 'Standard blueprint contrast'}
+              </span>
+            </div>
+            <button
+              onClick={toggleHighContrast}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition ${
+                highContrast
+                  ? 'bg-blueprint-teal text-white border-blueprint-teal'
+                  : 'bg-white dark:bg-blueprint-nightCard border-blueprint-creamBorder dark:border-blueprint-nightBorder text-blueprint-navy dark:text-gray-200'
+              }`}
+            >
+              {highContrast ? 'Active' : 'Enable'}
             </button>
           </div>
 

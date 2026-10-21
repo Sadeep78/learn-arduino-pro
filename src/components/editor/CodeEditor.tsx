@@ -191,7 +191,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = () => {
   return (
     <div
       className={`flex flex-col bg-[#1E1E1E] rounded-2xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-xl overflow-hidden select-none transition-all ${
-        isFullscreen ? 'fixed inset-4 z-50' : 'h-[620px]'
+        isFullscreen ? 'fixed inset-4 z-50' : 'h-full'
       }`}
     >
       {/* Editor Header Bar */}

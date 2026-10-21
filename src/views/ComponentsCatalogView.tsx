@@ -116,45 +116,66 @@ export const ComponentsCatalogView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Component Cards List */}
         <div className="lg:col-span-5 space-y-2.5 max-h-[700px] overflow-y-auto pr-1">
-          {filtered.map((item) => {
-            const Icon = iconMap[item.iconName] || Cpu;
-            const isSelected = selectedComp?.id === item.id;
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedComp(item)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${
-                  isSelected
-                    ? 'bg-white dark:bg-blueprint-nightBg border-blueprint-teal ring-2 ring-blueprint-teal/30 shadow-md'
-                    : 'bg-white/70 dark:bg-blueprint-nightCard/70 border-blueprint-creamBorder dark:border-blueprint-nightBorder hover:border-blueprint-teal/50'
-                }`}
+          {filtered.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-white/60 dark:bg-blueprint-nightCard/60 border border-dashed border-blueprint-creamBorder dark:border-blueprint-nightBorder">
+              <Cpu className="w-8 h-8 text-gray-400 mx-auto mb-2 opacity-50" />
+              <p className="text-xs font-mono font-bold text-blueprint-navy dark:text-gray-300">
+                No matching components
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Try clearing the search query or selecting a different category.
+              </p>
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setActiveCategory('All');
+                }}
+                className="mt-3 px-3 py-1 text-xs font-mono font-bold text-blueprint-teal hover:underline"
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 ${
-                      isSelected
-                        ? 'bg-blueprint-teal text-white shadow-teal-glow'
-                        : 'bg-blueprint-tealLight dark:bg-blueprint-teal/15 text-blueprint-teal'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
+                Reset filters
+              </button>
+            </div>
+          ) : (
+            filtered.map((item) => {
+              const Icon = iconMap[item.iconName] || Cpu;
+              const isSelected = selectedComp?.id === item.id;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setSelectedComp(item)}
+                  className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${
+                    isSelected
+                      ? 'bg-white dark:bg-blueprint-nightBg border-blueprint-teal ring-2 ring-blueprint-teal/30 shadow-md'
+                      : 'bg-white/70 dark:bg-blueprint-nightCard/70 border-blueprint-creamBorder dark:border-blueprint-nightBorder hover:border-blueprint-teal/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 ${
+                        isSelected
+                          ? 'bg-blueprint-teal text-white shadow-teal-glow'
+                          : 'bg-blueprint-tealLight dark:bg-blueprint-teal/15 text-blueprint-teal'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-bold text-blueprint-navy dark:text-white group-hover:text-blueprint-teal transition-colors">
+                        {item.name}
+                      </h4>
+                      <span className="text-[10px] font-mono text-gray-400">
+                        {item.category} · {item.voltageRating}
+                      </span>
+                    </div>
                   </div>
 
-                  <div>
-                    <h4 className="text-xs font-bold text-blueprint-navy dark:text-white group-hover:text-blueprint-teal transition-colors">
-                      {item.name}
-                    </h4>
-                    <span className="text-[10px] font-mono text-gray-400">
-                      {item.category} · {item.voltageRating}
-                    </span>
-                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blueprint-teal transition" />
                 </div>
-
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blueprint-teal transition" />
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Right: Detailed Datasheet Inspector */}

@@ -18,7 +18,7 @@ import { CertificateGenerator } from './components/gamification/CertificateGener
 import { useUIStore } from './store/useUIStore';
 
 export const App: React.FC = () => {
-  const { activeNav, theme } = useUIStore();
+  const { activeNav, theme, highContrast } = useUIStore();
 
   // Sync theme with html document class
   useEffect(() => {
@@ -28,6 +28,15 @@ export const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  // Sync high contrast mode
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+  }, [highContrast]);
 
   return (
     <div className="min-h-screen flex flex-col bg-blueprint-cream dark:bg-blueprint-nightBg text-blueprint-navy dark:text-gray-100 transition-colors">

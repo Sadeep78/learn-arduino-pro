@@ -609,12 +609,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         wires: createdWires
       };
       const resolved = updateComponentStates(newCircuit, state.pinStates);
+      const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
       set({
         past: [...state.past, state.circuit],
         future: [],
         circuit: { ...newCircuit, components: resolved },
-        warnings: validateCircuit(newCircuit)
+        warnings: erc.warnings,
+        checklist: erc.checklist,
+        isShortCircuit: erc.isShortCircuit
       });
       if (!state.isRunning) {
         get().startSimulation();
@@ -644,12 +647,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         wires: createdWires
       };
       const resolved = updateComponentStates(newCircuit, state.pinStates);
+      const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
       set({
         past: [...state.past, state.circuit],
         future: [],
         circuit: { ...newCircuit, components: resolved },
-        warnings: validateCircuit(newCircuit)
+        warnings: erc.warnings,
+        checklist: erc.checklist,
+        isShortCircuit: erc.isShortCircuit
       });
       if (!state.isRunning) {
         get().startSimulation();
