@@ -122,6 +122,14 @@ export function validateCircuit(circuit: CircuitState): CircuitWarning[] {
         message: `${led.name} is wired without a current-limiting resistor!`,
         helpText: 'In physical hardware, LEDs have near-zero resistance when forward biased. Add a 220Ω resistor in series with the LED to prevent burning it out.'
       });
+    } else if (!hasSource && !hasGround) {
+      warnings.push({
+        id: `led-unwired-${led.id}`,
+        level: 'info',
+        componentId: led.id,
+        message: `${led.name} is not connected to the circuit.`,
+        helpText: "Connect wires from Arduino Pin 13 to LED Anode (+) and Cathode (-) to GND, or click '⚡ Auto-Wire LED' above."
+      });
     }
   });
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { CircuitComponent } from '../../../types/simulator';
+import { useSimulatorStore } from '../../../store/useSimulatorStore';
 
 interface UnoCanvasPartProps {
   component: CircuitComponent;
@@ -14,6 +15,8 @@ export const UnoCanvasPart: React.FC<UnoCanvasPartProps> = ({
   onPinClick,
   activeWiringPin
 }) => {
+  const { pinStates, isRunning } = useSimulatorStore();
+  const isPin13High = isRunning && (pinStates[13]?.digitalValue === 1 || pinStates[13]?.analogValue > 0 || pinStates[13]?.voltage >= 2.5);
   // Pin definitions with exact relative pixel offsets on the board
   // Digital pins across the top (left to right: AREF, GND, 13 ... 0)
   const topPins = [
@@ -89,6 +92,31 @@ export const UnoCanvasPart: React.FC<UnoCanvasPartProps> = ({
             ATMEGA328P-PU
           </span>
           <div className="w-1.5 h-1.5 rounded-full bg-gray-700" />
+        </div>
+      </div>
+
+      {/* Onboard LEDs: L (Pin 13) and ON (Power 5V) */}
+      <div className="absolute top-12 left-16 flex flex-col gap-1.5 pointer-events-none">
+        <div className="flex items-center gap-1">
+          <div
+            className={`w-2.5 h-2.5 rounded-sm border transition-all ${
+              isPin13High
+                ? 'bg-amber-300 border-amber-100 shadow-[0_0_8px_#f59e0b]'
+                : 'bg-amber-950/70 border-amber-900/60'
+            }`}
+          />
+          <span className="text-[8px] font-mono font-bold text-amber-200">L</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <div
+            className={`w-2.5 h-2.5 rounded-sm border transition-all ${
+              isRunning
+                ? 'bg-emerald-400 border-emerald-200 shadow-[0_0_8px_#10b981]'
+                : 'bg-emerald-950/70 border-emerald-900/60'
+            }`}
+          />
+          <span className="text-[8px] font-mono font-bold text-emerald-200">ON</span>
         </div>
       </div>
 

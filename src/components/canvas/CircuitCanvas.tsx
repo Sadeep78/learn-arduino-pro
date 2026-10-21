@@ -57,8 +57,14 @@ export const CircuitCanvas: React.FC = () => {
     updateComponentProperty,
     undo,
     redo,
+    autoWireLed,
     resetCanvas
   } = useSimulatorStore();
+
+  const hasUno = circuit.components.some((c) => c.type === 'arduino_uno');
+  const hasLed = circuit.components.some((c) => c.type === 'led');
+  const hasWires = circuit.wires.length > 0;
+  const canAutoWire = hasUno && hasLed && !hasWires;
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const [draggingCompId, setDraggingCompId] = useState<string | null>(null);
@@ -191,8 +197,19 @@ export const CircuitCanvas: React.FC = () => {
           ))}
         </div>
 
-        {/* Right: Simulation Run/Stop Toggle */}
+        {/* Right: Simulation Run/Stop Toggle & Auto-Wire */}
         <div className="flex items-center gap-2 pointer-events-auto">
+          {canAutoWire && (
+            <button
+              onClick={autoWireLed}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-mono font-bold text-xs shadow-lg shadow-amber-500/20 transition animate-pulse"
+              title="Automatically connect Pin 13 to LED Anode and GND to Cathode"
+            >
+              <Zap className="w-4 h-4 fill-current" />
+              <span>⚡ Auto-Wire LED</span>
+            </button>
+          )}
+
           {isRunning ? (
             <button
               onClick={stopSimulation}

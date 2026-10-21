@@ -63,6 +63,7 @@ interface SimulatorStore {
 
   undo: () => void;
   redo: () => void;
+  autoWireLed: () => void;
   resetCanvas: () => void;
   loadCircuit: (circuit: CircuitState, code?: string) => void;
 }
@@ -517,6 +518,100 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       selectedWireId: null,
       wiringSource: null
     });
+  },
+
+  autoWireLed: () => {
+    const state = get();
+    const uno = state.circuit.components.find((c) => c.type === 'arduino_uno');
+    const led = state.circuit.components.find((c) => c.type === 'led');
+    const res = state.circuit.components.find((c) => c.type === 'resistor');
+
+    if (!uno || !led) return;
+
+    // Filter out existing wires for this LED to avoid duplicate loops
+    const cleanWires = state.circuit.wires.filter(
+      (w) => w.fromComponentId !== led.id && w.toComponentId !== led.id
+    );
+
+    let createdWires: CircuitWire[] = [];
+
+    if (res) {
+      const cleanResWires = cleanWires.filter(
+        (w) => w.fromComponentId !== res.id && w.toComponentId !== res.id
+      );
+
+      createdWires = [
+        {
+          id: `w-auto-1-${Date.now()}`,
+          fromComponentId: uno.id,
+          fromPinId: 'd13',
+          toComponentId: res.id,
+          toPinId: 'pin1',
+          color: '#10B981'
+        },
+        {
+          id: `w-auto-2-${Date.now()}`,
+          fromComponentId: res.id,
+          fromPinId: 'pin2',
+          toComponentId: led.id,
+          toPinId: 'anode',
+          color: '#10B981'
+        },
+        {
+          id: `w-auto-3-${Date.now()}`,
+          fromComponentId: led.id,
+          fromPinId: 'cathode',
+          toComponentId: uno.id,
+          toPinId: 'gnd3',
+          color: '#1F2937'
+        }
+      ];
+
+      const newCircuit = {
+        ...state.circuit,
+        wires: [...cleanResWires, ...createdWires]
+      };
+      const resolved = updateComponentStates(newCircuit, state.pinStates);
+
+      set({
+        past: [...state.past, state.circuit],
+        future: [],
+        circuit: { ...newCircuit, components: resolved },
+        warnings: validateCircuit(newCircuit)
+      });
+    } else {
+      createdWires = [
+        {
+          id: `w-auto-1-${Date.now()}`,
+          fromComponentId: uno.id,
+          fromPinId: 'd13',
+          toComponentId: led.id,
+          toPinId: 'anode',
+          color: '#10B981'
+        },
+        {
+          id: `w-auto-2-${Date.now()}`,
+          fromComponentId: led.id,
+          fromPinId: 'cathode',
+          toComponentId: uno.id,
+          toPinId: 'gnd3',
+          color: '#1F2937'
+        }
+      ];
+
+      const newCircuit = {
+        ...state.circuit,
+        wires: [...cleanWires, ...createdWires]
+      };
+      const resolved = updateComponentStates(newCircuit, state.pinStates);
+
+      set({
+        past: [...state.past, state.circuit],
+        future: [],
+        circuit: { ...newCircuit, components: resolved },
+        warnings: validateCircuit(newCircuit)
+      });
+    }
   },
 
   loadCircuit: (circuit, code) => {
