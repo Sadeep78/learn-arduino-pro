@@ -1,7 +1,7 @@
 <div align="center">
 
 # ⚡ Learn Arduino Pro
-### 🚀 EXPLORE · UNDERSTAND · BUILD
+### ⚡ DESIGN · SIMULATE · INNOVATE
 
 **An advanced, interactive browser-based Arduino learning platform, 3D digital twin, and real-time electronic circuit simulator.**
 
