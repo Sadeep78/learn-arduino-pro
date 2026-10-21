@@ -63,9 +63,14 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
 
         {/* LED Plastic Dome */}
         <div
-          className={`w-10 h-10 rounded-full relative flex items-center justify-center transition-all duration-150 border-2 ${
-            isGlowing ? 'border-white/80 shadow-lg' : 'border-black/60 shadow-inner'
+          onClick={(e) => {
+            e.stopPropagation();
+            onPinClick('anode');
+          }}
+          className={`w-10 h-10 rounded-full relative flex items-center justify-center transition-all duration-150 border-2 cursor-pointer ${
+            isGlowing ? 'border-white/80 shadow-lg' : 'border-black/60 shadow-inner hover:border-blueprint-teal'
           }`}
+          title="LED Bulb (Click to wire Anode +)"
           style={{
             backgroundColor: isGlowing ? hexColor : unlitStyle.bg,
             borderColor: isGlowing ? 'rgba(255, 255, 255, 0.85)' : unlitStyle.border,

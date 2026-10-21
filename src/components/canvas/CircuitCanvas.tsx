@@ -63,8 +63,8 @@ export const CircuitCanvas: React.FC = () => {
 
   const hasUno = circuit.components.some((c) => c.type === 'arduino_uno');
   const hasLed = circuit.components.some((c) => c.type === 'led');
-  const hasWires = circuit.wires.length > 0;
-  const canAutoWire = hasUno && hasLed && !hasWires;
+  const isLedOn = circuit.components.some((c) => c.type === 'led' && (c.properties?.brightness ?? 0) > 0.05);
+  const canAutoWire = hasUno && hasLed && !isLedOn;
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const [draggingCompId, setDraggingCompId] = useState<string | null>(null);
@@ -266,11 +266,56 @@ export const CircuitCanvas: React.FC = () => {
           const toComp = circuit.components.find((c) => c.id === wire.toComponentId);
           if (!fromComp || !toComp) return null;
 
-          // Estimate pin anchor positions
-          const x1 = fromComp.x + 40;
-          const y1 = fromComp.y + 40;
-          const x2 = toComp.x + 40;
-          const y2 = toComp.y + 40;
+          const getAnchor = (comp: typeof fromComp, pinId: string) => {
+            const norm = pinId.toLowerCase().trim();
+            if (comp.type === 'arduino_uno') {
+              const topPins = ['aref', 'gnd3', 'd13', 'd12', 'd11', 'd10', 'd9', 'd8', 'd7', 'd6', 'd5', 'd4', 'd3', 'd2', 'd1', 'd0'];
+              const topIdx = topPins.indexOf(norm);
+              if (topIdx !== -1) {
+                const rightStart = comp.x + 340 - 18;
+                return { x: rightStart - (15 - topIdx) * 17.5, y: comp.y + 12 };
+              }
+              const pwrPins = ['ioref', 'reset', '3v3', '5v', 'gnd1', 'gnd2', 'vin'];
+              const pIdx = pwrPins.indexOf(norm);
+              if (pIdx !== -1) {
+                return { x: comp.x + 72 + pIdx * 17.5, y: comp.y + 208 };
+              }
+            }
+            if (comp.type === 'led') {
+              if (norm === 'anode') return { x: comp.x + 24, y: comp.y + 78 };
+              if (norm === 'cathode') return { x: comp.x + 56, y: comp.y + 78 };
+              return { x: comp.x + 40, y: comp.y + 40 };
+            }
+            if (comp.type === 'resistor') {
+              if (norm === 'pin1') return { x: comp.x + 10, y: comp.y + 28 };
+              if (norm === 'pin2') return { x: comp.x + 102, y: comp.y + 28 };
+              return { x: comp.x + 56, y: comp.y + 28 };
+            }
+            if (comp.type === 'breadboard') {
+              const rowMatch = norm.match(/^([a-j])(\d+)$/);
+              if (rowMatch) {
+                const row = rowMatch[1];
+                const col = parseInt(rowMatch[2], 10);
+                const colX = comp.x + 28 + (col - 1) * 14.4;
+                const topRows = ['a', 'b', 'c', 'd', 'e'];
+                const botRows = ['f', 'g', 'h', 'i', 'j'];
+                if (topRows.includes(row)) {
+                  return { x: colX, y: comp.y + 36 + topRows.indexOf(row) * 12 };
+                }
+                if (botRows.includes(row)) {
+                  return { x: colX, y: comp.y + 126 + botRows.indexOf(row) * 12 };
+                }
+              }
+            }
+            return { x: comp.x + 40, y: comp.y + 40 };
+          };
+
+          const p1 = getAnchor(fromComp, wire.fromPinId);
+          const p2 = getAnchor(toComp, wire.toPinId);
+          const x1 = p1.x;
+          const y1 = p1.y;
+          const x2 = p2.x;
+          const y2 = p2.y;
 
           // Smooth Bezier curve control points
           const dx = (x2 - x1) * 0.5;

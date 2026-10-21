@@ -528,18 +528,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
     if (!uno || !led) return;
 
-    // Filter out existing wires for this LED to avoid duplicate loops
-    const cleanWires = state.circuit.wires.filter(
-      (w) => w.fromComponentId !== led.id && w.toComponentId !== led.id
-    );
-
     let createdWires: CircuitWire[] = [];
 
     if (res) {
-      const cleanResWires = cleanWires.filter(
-        (w) => w.fromComponentId !== res.id && w.toComponentId !== res.id
-      );
-
       createdWires = [
         {
           id: `w-auto-1-${Date.now()}`,
@@ -550,7 +541,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           color: '#10B981'
         },
         {
-          id: `w-auto-2-${Date.now()}`,
+          id: `w-auto-2-${Date.now() + 1}`,
           fromComponentId: res.id,
           fromPinId: 'pin2',
           toComponentId: led.id,
@@ -558,7 +549,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           color: '#10B981'
         },
         {
-          id: `w-auto-3-${Date.now()}`,
+          id: `w-auto-3-${Date.now() + 2}`,
           fromComponentId: led.id,
           fromPinId: 'cathode',
           toComponentId: uno.id,
@@ -569,7 +560,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
       const newCircuit = {
         ...state.circuit,
-        wires: [...cleanResWires, ...createdWires]
+        wires: createdWires
       };
       const resolved = updateComponentStates(newCircuit, state.pinStates);
 
@@ -579,6 +570,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         circuit: { ...newCircuit, components: resolved },
         warnings: validateCircuit(newCircuit)
       });
+      if (!state.isRunning) {
+        get().startSimulation();
+      }
     } else {
       createdWires = [
         {
@@ -590,7 +584,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           color: '#10B981'
         },
         {
-          id: `w-auto-2-${Date.now()}`,
+          id: `w-auto-2-${Date.now() + 1}`,
           fromComponentId: led.id,
           fromPinId: 'cathode',
           toComponentId: uno.id,
@@ -601,7 +595,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
       const newCircuit = {
         ...state.circuit,
-        wires: [...cleanWires, ...createdWires]
+        wires: createdWires
       };
       const resolved = updateComponentStates(newCircuit, state.pinStates);
 
@@ -611,6 +605,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         circuit: { ...newCircuit, components: resolved },
         warnings: validateCircuit(newCircuit)
       });
+      if (!state.isRunning) {
+        get().startSimulation();
+      }
     }
   },
 
