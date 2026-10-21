@@ -8,8 +8,6 @@ import {
   ChevronUp,
   AlertTriangle,
   CheckCircle2,
-  Sliders,
-  ChevronRight,
   GripVertical,
   LayoutGrid,
   Columns,
@@ -18,7 +16,7 @@ import {
   Play,
   Square,
   FileCode,
-  CheckSquare
+  Save
 } from 'lucide-react';
 import { CircuitCanvas } from '../components/canvas/CircuitCanvas';
 import { ComponentPalette } from '../components/canvas/ComponentPalette';
@@ -27,6 +25,7 @@ import { CodeEditor } from '../components/editor/CodeEditor';
 import { SerialMonitor } from '../components/editor/SerialMonitor';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUIStore } from '../store/useUIStore';
+import { useProjectStore } from '../store/useProjectStore';
 import { LESSONS } from '../data/lessons';
 
 export type SimulatorTab = 'circuit' | 'code' | 'check' | 'split';
@@ -43,6 +42,7 @@ export const SimulatorView: React.FC = () => {
     checklist,
     isShortCircuit
   } = useSimulatorStore();
+  const { saveProject } = useProjectStore();
 
   const activeLesson = LESSONS.find((l) => l.id === activeLessonId) || LESSONS[0];
 
@@ -63,6 +63,18 @@ export const SimulatorView: React.FC = () => {
   // Lesson change confirmation dialog
   const [pendingLessonId, setPendingLessonId] = useState<string | null>(null);
   const [showConfirmReset, setShowConfirmReset] = useState<boolean>(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveTitle, setSaveTitle] = useState('');
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  const handleSaveProject = () => {
+    const title = saveTitle.trim() || `${activeLesson.title} project`;
+    saveProject(title, `Saved from ${activeLesson.title}`, circuit, activeCode);
+    setShowSaveDialog(false);
+    setSaveTitle('');
+    setSaveStatus('Saved to My Projects');
+    setTimeout(() => setSaveStatus(null), 2500);
+  };
 
   // Synchronize on mount if simulator circuit doesn't match active lesson
   useEffect(() => {
@@ -172,6 +184,21 @@ export const SimulatorView: React.FC = () => {
             <RotateCcw className="w-3.5 h-3.5 text-blueprint-teal" />
             <span className="hidden sm:inline">Reset</span>
           </button>
+
+          <button
+            onClick={() => {
+              setSaveTitle(`${activeLesson.title} project`);
+              setShowSaveDialog(true);
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blueprint-creamDark dark:bg-blueprint-nightBg border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal transition flex-shrink-0"
+            title="Save this circuit and code to My Projects"
+          >
+            <Save className="w-3.5 h-3.5 text-blueprint-teal" />
+            <span className="hidden sm:inline">Save</span>
+          </button>
+          {saveStatus && (
+            <span className="text-[11px] font-mono font-bold text-emerald-600">{saveStatus}</span>
+          )}
         </div>
 
         {/* Center: Dedicated Mode Switcher Tabs */}
@@ -463,6 +490,39 @@ export const SimulatorView: React.FC = () => {
                   <SerialMonitor />
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSaveDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-blueprint-nightCard border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-blueprint-navy dark:text-white">Save to My Projects</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Give this circuit a name so you can open it later from the Projects page.
+            </p>
+            <input
+              type="text"
+              value={saveTitle}
+              onChange={(e) => setSaveTitle(e.target.value)}
+              autoFocus
+              className="w-full px-3 py-2 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder bg-blueprint-creamDark dark:bg-blueprint-nightBg text-sm text-blueprint-navy dark:text-white focus:outline-none focus:border-blueprint-teal"
+              placeholder="Project name"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowSaveDialog(false)}
+                className="px-4 py-2 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder text-xs font-mono"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProject}
+                className="px-4 py-2 rounded-xl bg-blueprint-teal text-white text-xs font-mono font-bold"
+              >
+                Save Project
+              </button>
             </div>
           </div>
         </div>

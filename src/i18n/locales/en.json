@@ -74,8 +74,19 @@
     "giveHint": "Give me a progressive hint",
     "quizMe": "Quiz me on this topic"
   },
+  "home": {
+    "welcomeTitle": "Welcome — learn Arduino in 3 simple steps",
+    "welcomeBody": "No extra software. No physical board needed. Follow a lesson, try it in the simulator, or watch a video. The Tutor button at the top can answer questions anytime.",
+    "stepLesson": "Start Lesson 1",
+    "stepLessonHint": "Meet the Arduino Uno board",
+    "stepSim": "Open the Simulator",
+    "stepSimHint": "Wire parts, write code, press Run",
+    "stepVideo": "Watch a video",
+    "stepVideoHint": "Then open the matching circuit",
+    "dismissGuide": "Hide this guide"
+  },
   "lessons": {
-    "title": "CURRICULUM LESSONS",
+    "title": "Start with these lessons",
     "badge": "11 Interactive Lessons",
     "start": "Launch Lesson",
     "completed": "Completed",

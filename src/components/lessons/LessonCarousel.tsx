@@ -39,7 +39,7 @@ export const LessonCarousel: React.FC = () => {
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-blueprint-teal" />
           <h3 className="text-sm font-extrabold font-mono text-blueprint-navy dark:text-white tracking-wide uppercase">
-            {t('lessons.title', 'CURRICULUM LESSONS')}
+            {t('lessons.title', 'Start with these lessons')}
           </h3>
           <span className="text-xs px-2 py-0.5 rounded-full bg-blueprint-tealLight dark:bg-blueprint-teal/15 text-blueprint-teal font-mono font-bold border border-blueprint-teal/30">
             {t('lessons.badge', '11 Interactive Lessons')}

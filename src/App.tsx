@@ -29,6 +29,11 @@ export const App: React.FC = () => {
     }
   }, [theme]);
 
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (main) main.scrollTo({ top: 0 });
+  }, [activeNav]);
+
   // Sync high contrast mode
   useEffect(() => {
     if (highContrast) {
@@ -48,7 +53,7 @@ export const App: React.FC = () => {
         <Sidebar />
 
         {/* Main Application Viewport */}
-        <main className={`flex-1 overflow-y-auto relative ${
+        <main className={`flex-1 overflow-y-auto relative pb-20 md:pb-4 ${
           activeNav === 'simulator' ? 'px-2 sm:px-4 py-3' : 'px-4 sm:px-6 lg:px-8 py-6'
         }`}>
           {/* Blueprint subtle engineering grid pattern background */}

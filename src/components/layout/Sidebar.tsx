@@ -19,16 +19,31 @@ export const Sidebar: React.FC = () => {
   const { t } = useTranslation();
   const { activeNav, setActiveNav, sidebarCollapsed, toggleSidebar } = useUIStore();
 
-  const navItems: { id: NavItem; labelKey: string; defaultLabel: string; icon: React.ElementType }[] = [
-    { id: 'home', labelKey: 'nav.home', defaultLabel: 'Home', icon: Home },
-    { id: 'lessons', labelKey: 'nav.lessons', defaultLabel: 'Lessons', icon: BookOpen },
-    { id: 'simulator', labelKey: 'nav.simulator', defaultLabel: 'Simulator', icon: PlaySquare },
-    { id: 'components', labelKey: 'nav.components', defaultLabel: 'Components', icon: Cpu },
-    { id: 'challenges', labelKey: 'nav.challenges', defaultLabel: 'Challenges', icon: Trophy },
-    { id: 'projects', labelKey: 'nav.projects', defaultLabel: 'Projects', icon: FolderGit2 },
-    { id: 'community', labelKey: 'nav.community', defaultLabel: 'Community', icon: Users },
-    { id: 'videos', labelKey: 'nav.videos', defaultLabel: 'Videos', icon: Video },
-    { id: 'settings', labelKey: 'nav.settings', defaultLabel: 'Settings', icon: Settings },
+  const navGroups: { label: string; items: { id: NavItem; labelKey: string; defaultLabel: string; icon: React.ElementType }[] }[] = [
+    {
+      label: 'Learn',
+      items: [
+        { id: 'home', labelKey: 'nav.home', defaultLabel: 'Home', icon: Home },
+        { id: 'lessons', labelKey: 'nav.lessons', defaultLabel: 'Lessons', icon: BookOpen },
+        { id: 'simulator', labelKey: 'nav.simulator', defaultLabel: 'Simulator', icon: PlaySquare },
+        { id: 'videos', labelKey: 'nav.videos', defaultLabel: 'Videos', icon: Video },
+      ]
+    },
+    {
+      label: 'Practice',
+      items: [
+        { id: 'components', labelKey: 'nav.components', defaultLabel: 'Components', icon: Cpu },
+        { id: 'challenges', labelKey: 'nav.challenges', defaultLabel: 'Challenges', icon: Trophy },
+        { id: 'projects', labelKey: 'nav.projects', defaultLabel: 'Projects', icon: FolderGit2 },
+        { id: 'community', labelKey: 'nav.community', defaultLabel: 'Community', icon: Users },
+      ]
+    },
+    {
+      label: 'Account',
+      items: [
+        { id: 'settings', labelKey: 'nav.settings', defaultLabel: 'Settings', icon: Settings },
+      ]
+    }
   ];
 
   return (
@@ -38,40 +53,48 @@ export const Sidebar: React.FC = () => {
       }`}
     >
       {/* Navigation Links */}
-      <div className="p-2 space-y-1 mt-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeNav === item.id;
-          return (
-            <button
-              key={item.id}
-              data-nav={item.id}
-              onClick={() => setActiveNav(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative ${
-                isActive
-                  ? 'bg-blueprint-teal text-white shadow-md shadow-blueprint-teal/20 font-semibold'
-                  : 'text-blueprint-navy dark:text-gray-300 hover:bg-blueprint-creamDark dark:hover:bg-blueprint-nightBg'
-              }`}
-              title={sidebarCollapsed ? t(item.labelKey, item.defaultLabel) : undefined}
-            >
-              <Icon
-                className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
-                  isActive ? 'text-white' : 'text-blueprint-teal'
-                }`}
-              />
-              {!sidebarCollapsed && (
-                <span className="truncate tracking-wide">{t(item.labelKey, item.defaultLabel)}</span>
-              )}
+      <div className="p-2 space-y-4 mt-2 overflow-y-auto">
+        {navGroups.map((group) => (
+          <div key={group.label} className="space-y-1">
+            {!sidebarCollapsed && (
+              <p className="px-3 pt-1 text-[10px] font-mono font-bold uppercase tracking-wider text-blueprint-navyMuted dark:text-gray-500">
+                {group.label}
+              </p>
+            )}
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  data-nav={item.id}
+                  onClick={() => setActiveNav(item.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative ${
+                    isActive
+                      ? 'bg-blueprint-teal text-white shadow-md shadow-blueprint-teal/20 font-semibold'
+                      : 'text-blueprint-navy dark:text-gray-300 hover:bg-blueprint-creamDark dark:hover:bg-blueprint-nightBg'
+                  }`}
+                  title={sidebarCollapsed ? t(item.labelKey, item.defaultLabel) : undefined}
+                >
+                  <Icon
+                    className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
+                      isActive ? 'text-white' : 'text-blueprint-teal'
+                    }`}
+                  />
+                  {!sidebarCollapsed && (
+                    <span className="truncate tracking-wide">{t(item.labelKey, item.defaultLabel)}</span>
+                  )}
 
-              {/* Tooltip on collapsed mode */}
-              {sidebarCollapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-blueprint-navy text-white text-xs rounded-md shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition whitespace-nowrap z-50">
-                  {t(item.labelKey, item.defaultLabel)}
-                </div>
-              )}
-            </button>
-          );
-        })}
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-blueprint-navy text-white text-xs rounded-md shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition whitespace-nowrap z-50">
+                      {t(item.labelKey, item.defaultLabel)}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* Collapse / Expand toggle button at the bottom */}
@@ -86,7 +109,7 @@ export const Sidebar: React.FC = () => {
           ) : (
             <div className="flex items-center gap-2">
               <ChevronLeft className="w-4 h-4" />
-              <span>Collapse</span>
+              <span>{t('nav.collapse', 'Collapse')}</span>
             </div>
           )}
         </button>

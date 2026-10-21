@@ -33,6 +33,13 @@ export const TopBar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<string>('');
   const [langDropdownOpen, setLangDropdownOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (!langDropdownOpen) return;
+    const close = () => setLangDropdownOpen(false);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [langDropdownOpen]);
+
   // Live real-time clock
   useEffect(() => {
     const updateTime = () => {
@@ -79,7 +86,14 @@ export const TopBar: React.FC = () => {
           <Menu className="w-5 h-5" />
         </button>
 
-        <BrandLogo size="md" />
+        <button
+          type="button"
+          onClick={() => setActiveNav('home')}
+          className="text-left rounded-xl hover:opacity-90 transition"
+          aria-label={t('nav.home', 'Home')}
+        >
+          <BrandLogo size="md" />
+        </button>
       </div>
 
       {/* Center: Curriculum Progress Card + Live Blueprint Clock (Hidden on very small screens) */}
@@ -121,8 +135,8 @@ export const TopBar: React.FC = () => {
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Streak Counter */}
         <div
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-mono font-bold shadow-sm"
-          title={`${streakDays} Day Active Coding Streak!`}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-mono font-bold shadow-sm"
+          title={`${streakDays} ${t('topbar.streak', 'Day Streak')}`}
         >
           <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
           <span>{streakDays}d</span>
@@ -130,18 +144,21 @@ export const TopBar: React.FC = () => {
 
         {/* XP & Level Badge */}
         <div
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blueprint-tealLight dark:bg-blueprint-teal/15 border border-blueprint-teal/30 text-blueprint-teal dark:text-teal-300 text-xs font-mono font-bold shadow-sm"
-          title={`Level ${level} Explorer · Total XP: ${xp}`}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blueprint-tealLight dark:bg-blueprint-teal/15 border border-blueprint-teal/30 text-blueprint-teal dark:text-teal-300 text-xs font-mono font-bold shadow-sm"
+          title={`Level ${level} · ${xp} XP`}
         >
           <Zap className="w-4 h-4 fill-blueprint-teal text-blueprint-teal" />
           <span>LVL {level}</span>
-          <span className="opacity-70 text-[10px]">({xp} XP)</span>
+          <span className="opacity-70 text-[10px] hidden md:inline">({xp} XP)</span>
         </div>
 
         {/* Language Switcher Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setLangDropdownOpen(!langDropdownOpen);
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder hover:bg-blueprint-creamDark dark:hover:bg-blueprint-nightBg text-xs font-medium text-blueprint-navy dark:text-gray-200 transition"
             aria-label="Change Language"
           >
@@ -151,7 +168,10 @@ export const TopBar: React.FC = () => {
           </button>
 
           {langDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-36 py-1 bg-white dark:bg-blueprint-nightCard border border-blueprint-creamBorder dark:border-blueprint-nightBorder rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute right-0 mt-2 w-36 py-1 bg-white dark:bg-blueprint-nightCard border border-blueprint-creamBorder dark:border-blueprint-nightBorder rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+            >
               {languages.map((l) => (
                 <button
                   key={l.code}

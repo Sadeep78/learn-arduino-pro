@@ -67,7 +67,7 @@ export const MobileDrawer: React.FC = () => {
       <div className="w-64 h-full bg-blueprint-cream dark:bg-blueprint-nightCard p-4 border-r border-blueprint-creamBorder dark:border-blueprint-nightBorder flex flex-col justify-between shadow-2xl">
         <div>
           <div className="flex items-center justify-between pb-4 border-b border-blueprint-creamBorder dark:border-blueprint-nightBorder">
-            <span className="font-extrabold text-sm text-blueprint-teal font-mono">NAVIGATION</span>
+            <span className="font-extrabold text-sm text-blueprint-teal font-mono">Menu</span>
             <button
               onClick={() => setMobileDrawerOpen(false)}
               className="p-1.5 rounded-lg text-gray-500 hover:bg-black/5 dark:hover:bg-white/5"

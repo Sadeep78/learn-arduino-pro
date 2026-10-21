@@ -38,6 +38,44 @@ export const LessonsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <div className="p-4 rounded-2xl bg-white/80 dark:bg-blueprint-nightCard/80 border border-blueprint-creamBorder dark:border-blueprint-nightBorder">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <h2 className="text-lg font-black text-blueprint-navy dark:text-white">Choose a lesson</h2>
+            <p className="text-xs text-blueprint-navyMuted dark:text-gray-400 mt-0.5">
+              Start from Lesson 01. Open it in the simulator, then take the quiz to complete.
+            </p>
+          </div>
+          <span className="text-xs font-mono font-bold text-blueprint-teal bg-blueprint-teal/10 px-2.5 py-1 rounded-lg">
+            {completedLessons.length}/11 done
+          </span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {LESSONS.map((l) => {
+            const done = completedLessons.includes(l.id);
+            const current = l.id === lesson.id;
+            return (
+              <button
+                key={l.id}
+                onClick={() => setActiveLessonId(l.id)}
+                className={`flex-shrink-0 min-w-[132px] px-3 py-2.5 rounded-xl border text-left transition ${
+                  current
+                    ? 'border-blueprint-teal bg-blueprint-teal text-white shadow-sm'
+                    : 'border-blueprint-creamBorder dark:border-blueprint-nightBorder bg-blueprint-creamDark/60 dark:bg-blueprint-nightBg/60 hover:border-blueprint-teal'
+                }`}
+              >
+                <span className={`block text-[10px] font-mono font-bold ${current ? 'text-white/80' : 'text-blueprint-teal'}`}>
+                  #{String(l.number).padStart(2, '0')} {done ? '✓' : ''}
+                </span>
+                <span className={`block text-xs font-bold mt-0.5 line-clamp-2 ${current ? 'text-white' : 'text-blueprint-navy dark:text-gray-100'}`}>
+                  {l.title}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Top Banner: Lesson Title, Category, Stats, and Actions */}
       <div className="p-6 rounded-2xl bg-white/80 dark:bg-blueprint-nightCard/80 border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-blueprint flex flex-col md:flex-row items-start md:items-center justify-between gap-4 select-none">
         <div>
@@ -173,10 +211,13 @@ export const LessonsView: React.FC = () => {
             </div>
 
             {/* Checkpoint & Circuit Completion Action */}
-            <div className="pt-2 border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder">
+            <div className="pt-2 border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder space-y-2">
+              <p className="text-[11px] text-blueprint-navyMuted dark:text-gray-400 leading-relaxed">
+                Two easy ways to finish: take the quiz, or open the simulator, wire the circuit, then mark complete.
+              </p>
               <button
                 onClick={() => completeLesson(lesson.id, lesson.xpReward)}
-                disabled={!isCircuitValid || isCompleted}
+                disabled={(!isCircuitValid && !isCompleted) || isCompleted}
                 className={`w-full py-2.5 px-4 rounded-xl font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm ${
                   isCompleted
                     ? 'bg-emerald-500 text-white cursor-default'
