@@ -15,6 +15,7 @@ export const ServoCanvasPart: React.FC<ServoPartProps> = ({
   activeWiringPin
 }) => {
   const angle = component.properties?.angle ?? 90; // 0 to 180 degrees
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -47,9 +48,15 @@ export const ServoCanvasPart: React.FC<ServoPartProps> = ({
             e.stopPropagation();
             onPinClick('signal');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="PWM Signal (Orange)"
         >
+          {unconnectedPins.includes('signal') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-2.5 h-2.5 rounded-full ${
               activeWiringPin === 'signal' ? 'bg-blueprint-teal animate-ping' : 'bg-orange-500'
@@ -63,9 +70,15 @@ export const ServoCanvasPart: React.FC<ServoPartProps> = ({
             e.stopPropagation();
             onPinClick('vcc');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Power 5V (Red)"
         >
+          {unconnectedPins.includes('vcc') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-2.5 h-2.5 rounded-full ${
               activeWiringPin === 'vcc' ? 'bg-blueprint-teal animate-ping' : 'bg-red-500'
@@ -79,9 +92,15 @@ export const ServoCanvasPart: React.FC<ServoPartProps> = ({
             e.stopPropagation();
             onPinClick('gnd');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Ground (Brown/Black)"
         >
+          {unconnectedPins.includes('gnd') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-2.5 h-2.5 rounded-full ${
               activeWiringPin === 'gnd' ? 'bg-blueprint-teal animate-ping' : 'bg-amber-900'

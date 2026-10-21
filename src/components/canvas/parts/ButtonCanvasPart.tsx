@@ -17,6 +17,7 @@ export const ButtonCanvasPart: React.FC<ButtonPartProps> = ({
   onTogglePress
 }) => {
   const isPressed = Boolean(component.properties?.isPressed);
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -31,13 +32,20 @@ export const ButtonCanvasPart: React.FC<ButtonPartProps> = ({
           e.stopPropagation();
           onPinClick('pin1');
         }}
-        className={`w-3.5 h-3.5 rounded-full border-2 transition ${
+        className={`relative w-3.5 h-3.5 rounded-full border-2 transition ${
           activeWiringPin === 'pin1'
             ? 'bg-blueprint-teal border-white animate-ping'
             : 'bg-gray-400 border-gray-600 hover:bg-blueprint-teal'
         }`}
         title="Button Contact Pin 1"
-      />
+      >
+        {unconnectedPins.includes('pin1') && (
+          <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+        )}
+      </button>
 
       {/* Tactile Button Round Plunger (Clickable directly on canvas) */}
       <button
@@ -63,13 +71,20 @@ export const ButtonCanvasPart: React.FC<ButtonPartProps> = ({
           e.stopPropagation();
           onPinClick('pin2');
         }}
-        className={`w-3.5 h-3.5 rounded-full border-2 transition ${
+        className={`relative w-3.5 h-3.5 rounded-full border-2 transition ${
           activeWiringPin === 'pin2'
             ? 'bg-blueprint-teal border-white animate-ping'
             : 'bg-gray-400 border-gray-600 hover:bg-blueprint-teal'
         }`}
         title="Button Contact Pin 2"
-      />
+      >
+        {unconnectedPins.includes('pin2') && (
+          <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+        )}
+      </button>
     </div>
   );
 };

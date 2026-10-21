@@ -39,8 +39,32 @@ export interface CircuitComponent {
     frequency?: number; // for buzzer
     active?: boolean;
     brightness?: number; // 0-1
+    isBurnt?: boolean; // burnt out state (e.g. LED without resistor)
+    isBackwards?: boolean; // reverse polarity
+    unconnectedPins?: string[]; // pins missing connection
     [key: string]: any;
   };
+}
+
+export interface CircuitCheckItem {
+  id: string;
+  label: string;
+  status: 'pass' | 'fail' | 'warning';
+  details: string;
+  componentId?: string;
+  pinId?: string;
+  wireId?: string;
+}
+
+export interface RequiredConnection {
+  from: string; // e.g. "uno:d13" or "uno:13"
+  to: string; // e.g. "resistor:pin1"
+  description?: string;
+}
+
+export interface RequiredCircuit {
+  components: { type: ComponentType; count?: number; properties?: Record<string, any> }[];
+  connections: RequiredConnection[];
 }
 
 export interface CircuitWire {

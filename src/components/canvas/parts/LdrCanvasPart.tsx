@@ -18,6 +18,7 @@ export const LdrCanvasPart: React.FC<LdrPartProps> = ({
   onValueChange
 }) => {
   const value = component.properties?.value ?? 600; // 0 (dark) to 1023 (bright)
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -54,9 +55,15 @@ export const LdrCanvasPart: React.FC<LdrPartProps> = ({
             e.stopPropagation();
             onPinClick('pin1');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Terminal 1"
         >
+          {unconnectedPins.includes('pin1') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'pin1' ? 'bg-blueprint-teal animate-ping' : 'bg-gray-400'
@@ -70,9 +77,15 @@ export const LdrCanvasPart: React.FC<LdrPartProps> = ({
             e.stopPropagation();
             onPinClick('pin2');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Terminal 2"
         >
+          {unconnectedPins.includes('pin2') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'pin2' ? 'bg-blueprint-teal animate-ping' : 'bg-gray-400'

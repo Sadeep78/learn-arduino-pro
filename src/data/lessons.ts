@@ -60,6 +60,10 @@ void loop() {
       ],
       wires: []
     },
+    requiredCircuit: {
+      components: [{ type: 'arduino_uno', count: 1 }],
+      connections: []
+    },
     checkpoints: [
       {
         id: 'cp1-1',
@@ -206,6 +210,18 @@ void loop() {
         }
       ]
     },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'led', count: 1 },
+        { type: 'resistor', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:d8', to: 'res-1:pin1', description: 'Pin 8 to 220Ω Resistor Pin 1' },
+        { from: 'res-1:pin2', to: 'led-1:anode', description: 'Resistor Pin 2 to LED Anode (+)' },
+        { from: 'led-1:cathode', to: 'uno-1:gnd1', description: 'LED Cathode (-) to GND' }
+      ]
+    },
     checkpoints: [
       {
         id: 'cp2-1',
@@ -333,6 +349,21 @@ void loop() {
         { id: 'w-led-gnd', fromComponentId: 'led-1', fromPinId: 'cathode', toComponentId: 'uno-1', toPinId: 'gnd2', color: '#1F2937' }
       ]
     },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'button', count: 1 },
+        { type: 'led', count: 1 },
+        { type: 'resistor', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:d2', to: 'btn-1:pin1', description: 'Pin 2 to Push Button Pin 1' },
+        { from: 'btn-1:pin2', to: 'uno-1:gnd1', description: 'Push Button Pin 2 to GND' },
+        { from: 'uno-1:d8', to: 'res-1:pin1', description: 'Pin 8 to Resistor Pin 1' },
+        { from: 'res-1:pin2', to: 'led-1:anode', description: 'Resistor Pin 2 to LED Anode (+)' },
+        { from: 'led-1:cathode', to: 'uno-1:gnd2', description: 'LED Cathode (-) to GND' }
+      ]
+    },
     checkpoints: [
       {
         id: 'cp3-1',
@@ -424,6 +455,22 @@ void loop() {
         { id: 'w-l1', fromComponentId: 'uno-1', fromPinId: 'd9', toComponentId: 'res-1', toPinId: 'pin1', color: '#14B8A6' },
         { id: 'w-l2', fromComponentId: 'res-1', fromPinId: 'pin2', toComponentId: 'led-1', toPinId: 'anode', color: '#14B8A6' },
         { id: 'w-l3', fromComponentId: 'led-1', fromPinId: 'cathode', toComponentId: 'uno-1', toPinId: 'gnd2', color: '#1F2937' }
+      ]
+    },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'potentiometer', count: 1 },
+        { type: 'led', count: 1 },
+        { type: 'resistor', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:5v', to: 'pot-1:vcc', description: '5V to Potentiometer VCC' },
+        { from: 'uno-1:gnd1', to: 'pot-1:gnd', description: 'GND to Potentiometer GND' },
+        { from: 'uno-1:a0', to: 'pot-1:wiper', description: 'A0 to Potentiometer Wiper' },
+        { from: 'uno-1:d9', to: 'res-1:pin1', description: 'Pin 9 to Resistor Pin 1' },
+        { from: 'res-1:pin2', to: 'led-1:anode', description: 'Resistor Pin 2 to LED Anode (+)' },
+        { from: 'led-1:cathode', to: 'uno-1:gnd2', description: 'LED Cathode (-) to GND' }
       ]
     },
     checkpoints: [
@@ -526,6 +573,18 @@ void loop() {
         { id: 'w-c', fromComponentId: 'rgb-1', fromPinId: 'cathode', toComponentId: 'uno-1', toPinId: 'gnd1', color: '#1F2937' }
       ]
     },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'rgb_led', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:d9', to: 'rgb-1:r', description: 'Pin 9 to RGB Red Pin' },
+        { from: 'uno-1:d10', to: 'rgb-1:g', description: 'Pin 10 to RGB Green Pin' },
+        { from: 'uno-1:d11', to: 'rgb-1:b', description: 'Pin 11 to RGB Blue Pin' },
+        { from: 'rgb-1:cathode', to: 'uno-1:gnd1', description: 'Common Cathode to GND' }
+      ]
+    },
     checkpoints: [
       {
         id: 'cp5-1',
@@ -605,6 +664,16 @@ void loop() {
         { id: 'w-bz-neg', fromComponentId: 'buzzer-1', fromPinId: 'neg', toComponentId: 'uno-1', toPinId: 'gnd1', color: '#1F2937' }
       ]
     },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'buzzer', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:d8', to: 'buzzer-1:pos', description: 'Pin 8 to Buzzer (+)' },
+        { from: 'buzzer-1:neg', to: 'uno-1:gnd1', description: 'Buzzer (-) to GND' }
+      ]
+    },
     checkpoints: [
       {
         id: 'cp6-1',
@@ -682,6 +751,19 @@ void loop() {
         { id: 'w-ldr-sig', fromComponentId: 'ldr-1', fromPinId: 'pin2', toComponentId: 'uno-1', toPinId: 'a0', color: '#06B6D4' },
         { id: 'w-led-sig', fromComponentId: 'uno-1', fromPinId: 'd12', toComponentId: 'led-1', toPinId: 'anode', color: '#10B981' },
         { id: 'w-led-gnd', fromComponentId: 'led-1', fromPinId: 'cathode', toComponentId: 'uno-1', toPinId: 'gnd1', color: '#1F2937' }
+      ]
+    },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'ldr', count: 1 },
+        { type: 'led', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:5v', to: 'ldr-1:pin1', description: '5V to LDR Pin 1' },
+        { from: 'ldr-1:pin2', to: 'uno-1:a0', description: 'LDR Pin 2 to A0' },
+        { from: 'uno-1:d12', to: 'led-1:anode', description: 'Pin 12 to LED Anode (+)' },
+        { from: 'led-1:cathode', to: 'uno-1:gnd1', description: 'LED Cathode (-) to GND' }
       ]
     },
     checkpoints: [
@@ -774,6 +856,17 @@ void loop() {
         { id: 'w-srv-sig', fromComponentId: 'uno-1', fromPinId: 'd9', toComponentId: 'servo-1', toPinId: 'signal', color: '#F97316' }
       ]
     },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'servo', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:5v', to: 'servo-1:vcc', description: '5V to Servo VCC (Red)' },
+        { from: 'uno-1:gnd1', to: 'servo-1:gnd', description: 'GND to Servo GND (Brown)' },
+        { from: 'uno-1:d9', to: 'servo-1:signal', description: 'Pin 9 to Servo Signal (Orange)' }
+      ]
+    },
     checkpoints: [
       {
         id: 'cp8-1',
@@ -849,6 +942,12 @@ void loop() {
         { id: 'uno-1', type: 'arduino_uno', name: 'Arduino Uno R3', x: 200, y: 120, rotation: 0, properties: {} }
       ],
       wires: []
+    },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 }
+      ],
+      connections: []
     },
     checkpoints: [
       {
@@ -939,6 +1038,18 @@ void loop() {
         { id: 'w-us-gnd', fromComponentId: 'uno-1', fromPinId: 'gnd1', toComponentId: 'sonar-1', toPinId: 'gnd', color: '#1F2937' },
         { id: 'w-us-trg', fromComponentId: 'uno-1', fromPinId: 'd12', toComponentId: 'sonar-1', toPinId: 'trig', color: '#3B82F6' },
         { id: 'w-us-ech', fromComponentId: 'uno-1', fromPinId: 'd11', toComponentId: 'sonar-1', toPinId: 'echo', color: '#8B5CF6' }
+      ]
+    },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'ultrasonic', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:5v', to: 'sonar-1:vcc', description: '5V to Ultrasonic VCC' },
+        { from: 'uno-1:gnd1', to: 'sonar-1:gnd', description: 'GND to Ultrasonic GND' },
+        { from: 'uno-1:d12', to: 'sonar-1:trig', description: 'Pin 12 to Ultrasonic TRIG' },
+        { from: 'uno-1:d11', to: 'sonar-1:echo', description: 'Pin 11 to Ultrasonic ECHO' }
       ]
     },
     checkpoints: [
@@ -1066,6 +1177,22 @@ void loop() {
         { id: 'w4', fromComponentId: 'uno-1', fromPinId: 'd2', toComponentId: 'btn-1', toPinId: 'pin1', color: '#10B981' },
         { id: 'w5', fromComponentId: 'btn-1', fromPinId: 'pin2', toComponentId: 'uno-1', toPinId: 'gnd1', color: '#1F2937' },
         { id: 'w6', fromComponentId: 'buzzer-1', fromPinId: 'neg', toComponentId: 'uno-1', toPinId: 'gnd2', color: '#1F2937' }
+      ]
+    },
+    requiredCircuit: {
+      components: [
+        { type: 'arduino_uno', count: 1 },
+        { type: 'ultrasonic', count: 1 },
+        { type: 'buzzer', count: 1 },
+        { type: 'button', count: 1 }
+      ],
+      connections: [
+        { from: 'uno-1:d12', to: 'sonar-1:trig', description: 'Pin 12 to Sonar TRIG' },
+        { from: 'uno-1:d11', to: 'sonar-1:echo', description: 'Pin 11 to Sonar ECHO' },
+        { from: 'uno-1:d8', to: 'buzzer-1:pos', description: 'Pin 8 to Buzzer (+)' },
+        { from: 'uno-1:d2', to: 'btn-1:pin1', description: 'Pin 2 to Push Button' },
+        { from: 'btn-1:pin2', to: 'uno-1:gnd1', description: 'Push Button to GND' },
+        { from: 'buzzer-1:neg', to: 'uno-1:gnd2', description: 'Buzzer (-) to GND' }
       ]
     },
     checkpoints: [

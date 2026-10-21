@@ -18,6 +18,7 @@ export const RgbLedCanvasPart: React.FC<RgbLedPartProps> = ({
   const g = component.properties?.g ?? 0;
   const b = component.properties?.b ?? 0;
   const isGlowing = r > 15 || g > 15 || b > 15;
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -59,9 +60,15 @@ export const RgbLedCanvasPart: React.FC<RgbLedPartProps> = ({
               e.stopPropagation();
               onPinClick(pin.id);
             }}
-            className="flex flex-col items-center"
+            className="relative flex flex-col items-center"
             title={`RGB Pin: ${pin.label}`}
           >
+            {unconnectedPins.includes(pin.id) && (
+              <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+            )}
             <div
               className={`w-3 h-3 rounded-full border ${
                 activeWiringPin === pin.id ? 'bg-blueprint-teal animate-ping' : pin.color

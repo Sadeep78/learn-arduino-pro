@@ -17,6 +17,7 @@ export const UltrasonicCanvasPart: React.FC<UltrasonicPartProps> = ({
   onDistanceChange
 }) => {
   const distance = component.properties?.value ?? 45; // 2cm to 400cm
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -65,9 +66,15 @@ export const UltrasonicCanvasPart: React.FC<UltrasonicPartProps> = ({
               e.stopPropagation();
               onPinClick(pin.id);
             }}
-            className="flex flex-col items-center"
+            className="relative flex flex-col items-center"
             title={`Pin: ${pin.label}`}
           >
+            {unconnectedPins.includes(pin.id) && (
+              <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+            )}
             <div
               className={`w-2.5 h-2.5 rounded-full ${
                 activeWiringPin === pin.id ? 'bg-blueprint-teal animate-ping' : pin.color

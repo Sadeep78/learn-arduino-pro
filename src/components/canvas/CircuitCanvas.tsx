@@ -11,10 +11,15 @@ import {
   Square,
   Sparkles,
   Zap,
-  Palette
+  Palette,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useSimulatorStore } from '../../store/useSimulatorStore';
-import { ComponentType } from '../../types/simulator';
+import { useUIStore } from '../../store/useUIStore';
+import { ComponentType, CircuitComponent } from '../../types/simulator';
+import { LESSONS } from '../../data/lessons';
+import { CircuitCheckPanel } from './CircuitCheckPanel';
 
 // Component Canvas Parts
 import { UnoCanvasPart } from './parts/UnoCanvasPart';
@@ -30,6 +35,101 @@ import { LdrCanvasPart } from './parts/LdrCanvasPart';
 import { UltrasonicCanvasPart } from './parts/UltrasonicCanvasPart';
 import { Lcd1602CanvasPart } from './parts/Lcd1602CanvasPart';
 import { SevenSegmentCanvasPart } from './parts/SevenSegmentCanvasPart';
+
+export const getAnchor = (comp: CircuitComponent, pinId: string): { x: number; y: number } => {
+  const norm = pinId.toLowerCase().trim();
+  if (comp.type === 'arduino_uno') {
+    const topPins = ['aref', 'gnd3', 'd13', 'd12', 'd11', 'd10', 'd9', 'd8', 'd7', 'd6', 'd5', 'd4', 'd3', 'd2', 'd1', 'd0'];
+    const cleanNorm = norm.startsWith('d')
+      ? norm
+      : ['13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0'].includes(norm)
+      ? `d${norm}`
+      : norm;
+    const topIdx = topPins.indexOf(cleanNorm);
+    if (topIdx !== -1) {
+      const rightStart = comp.x + 340 - 18;
+      return { x: rightStart - (15 - topIdx) * 17.5, y: comp.y + 12 };
+    }
+    const pwrPins = ['ioref', 'reset', '3v3', '5v', 'gnd1', 'gnd2', 'vin'];
+    const pIdx = pwrPins.indexOf(norm === 'gnd' ? 'gnd1' : norm);
+    if (pIdx !== -1) {
+      return { x: comp.x + 72 + pIdx * 17.5, y: comp.y + 208 };
+    }
+    const aPins = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5'];
+    const aIdx = aPins.indexOf(norm);
+    if (aIdx !== -1) {
+      return { x: comp.x + 340 - 18 - (5 - aIdx) * 17.5, y: comp.y + 208 };
+    }
+  }
+  if (comp.type === 'led') {
+    if (norm === 'anode' || norm === 'pos' || norm === 'a') return { x: comp.x + 24, y: comp.y + 78 };
+    if (norm === 'cathode' || norm === 'neg' || norm === 'k') return { x: comp.x + 56, y: comp.y + 78 };
+    return { x: comp.x + 40, y: comp.y + 40 };
+  }
+  if (comp.type === 'resistor') {
+    if (norm === 'pin1' || norm === '1') return { x: comp.x + 10, y: comp.y + 28 };
+    if (norm === 'pin2' || norm === '2') return { x: comp.x + 102, y: comp.y + 28 };
+    return { x: comp.x + 56, y: comp.y + 28 };
+  }
+  if (comp.type === 'breadboard') {
+    const rowMatch = norm.match(/^([a-j])(\d+)$/);
+    if (rowMatch) {
+      const row = rowMatch[1];
+      const col = parseInt(rowMatch[2], 10);
+      const colX = comp.x + 28 + (col - 1) * 14.4;
+      const topRows = ['a', 'b', 'c', 'd', 'e'];
+      const botRows = ['f', 'g', 'h', 'i', 'j'];
+      if (topRows.includes(row)) {
+        return { x: colX, y: comp.y + 36 + topRows.indexOf(row) * 12 };
+      }
+      if (botRows.includes(row)) {
+        return { x: colX, y: comp.y + 126 + botRows.indexOf(row) * 12 };
+      }
+    }
+  }
+  if (comp.type === 'button') {
+    if (norm === 'pin1' || norm === '1') return { x: comp.x + 40, y: comp.y + 12 };
+    if (norm === 'pin2' || norm === '2') return { x: comp.x + 40, y: comp.y + 68 };
+    return { x: comp.x + 40, y: comp.y + 40 };
+  }
+  if (comp.type === 'potentiometer') {
+    if (norm === 'vcc' || norm === '5v' || norm === '1') return { x: comp.x + 16, y: comp.y + 116 };
+    if (norm === 'wiper' || norm === 'sig' || norm === '2') return { x: comp.x + 56, y: comp.y + 116 };
+    if (norm === 'gnd' || norm === '3') return { x: comp.x + 96, y: comp.y + 116 };
+    return { x: comp.x + 56, y: comp.y + 64 };
+  }
+  if (comp.type === 'buzzer') {
+    if (norm === 'pos' || norm === 'positive' || norm === '+') return { x: comp.x + 28, y: comp.y + 80 };
+    if (norm === 'neg' || norm === 'negative' || norm === '-') return { x: comp.x + 68, y: comp.y + 80 };
+    return { x: comp.x + 48, y: comp.y + 48 };
+  }
+  if (comp.type === 'servo') {
+    if (norm === 'signal' || norm === 'sig' || norm === 'pwm') return { x: comp.x + 24, y: comp.y + 98 };
+    if (norm === 'vcc' || norm === '5v' || norm === 'red') return { x: comp.x + 56, y: comp.y + 98 };
+    if (norm === 'gnd' || norm === 'brown') return { x: comp.x + 88, y: comp.y + 98 };
+    return { x: comp.x + 56, y: comp.y + 56 };
+  }
+  if (comp.type === 'ldr') {
+    if (norm === 'pin1' || norm === '1') return { x: comp.x + 32, y: comp.y + 98 };
+    if (norm === 'pin2' || norm === '2') return { x: comp.x + 80, y: comp.y + 98 };
+    return { x: comp.x + 56, y: comp.y + 56 };
+  }
+  if (comp.type === 'ultrasonic') {
+    if (norm === 'vcc') return { x: comp.x + 28, y: comp.y + 102 };
+    if (norm === 'trig') return { x: comp.x + 68, y: comp.y + 102 };
+    if (norm === 'echo') return { x: comp.x + 108, y: comp.y + 102 };
+    if (norm === 'gnd') return { x: comp.x + 148, y: comp.y + 102 };
+    return { x: comp.x + 88, y: comp.y + 56 };
+  }
+  if (comp.type === 'rgb_led') {
+    if (norm === 'r') return { x: comp.x + 18, y: comp.y + 98 };
+    if (norm === 'cathode' || norm === 'gnd') return { x: comp.x + 38, y: comp.y + 98 };
+    if (norm === 'g') return { x: comp.x + 58, y: comp.y + 98 };
+    if (norm === 'b') return { x: comp.x + 78, y: comp.y + 98 };
+    return { x: comp.x + 48, y: comp.y + 56 };
+  }
+  return { x: comp.x + 40, y: comp.y + 40 };
+};
 
 export const CircuitCanvas: React.FC = () => {
   const {
@@ -78,6 +178,76 @@ export const CircuitCanvas: React.FC = () => {
     { label: 'Yellow', hex: '#F59E0B' },
     { label: 'Purple', hex: '#8B5CF6' }
   ];
+
+  const { activeLessonId } = useUIStore();
+  const [showWiringGuide, setShowWiringGuide] = useState<boolean>(false);
+  const activeLesson = LESSONS.find((l) => l.id === activeLessonId);
+
+  const ghostConnections = React.useMemo(() => {
+    if (!showWiringGuide || !activeLesson?.requiredCircuit?.connections) return [];
+
+    const resolvePinAnchor = (target: string) => {
+      const parts = target.split(':');
+      const compRef = parts[0].toLowerCase().trim();
+      const pinRef = parts[1]?.toLowerCase().trim();
+      if (!pinRef) return null;
+
+      let comp = circuit.components.find((c) => c.id.toLowerCase() === compRef);
+      if (!comp) {
+        const typeMap: Record<string, ComponentType> = {
+          uno: 'arduino_uno',
+          bb: 'breadboard',
+          res: 'resistor',
+          led: 'led',
+          btn: 'button',
+          pot: 'potentiometer',
+          buzzer: 'buzzer',
+          bz: 'buzzer',
+          servo: 'servo',
+          srv: 'servo',
+          ldr: 'ldr',
+          sonar: 'ultrasonic',
+          ultrasonic: 'ultrasonic',
+          rgb: 'rgb_led'
+        };
+        const prefix = compRef.split('-')[0];
+        const targetType = typeMap[prefix];
+        if (targetType) {
+          comp = circuit.components.find((c) => c.type === targetType);
+        }
+      }
+      if (!comp) return null;
+      return { comp, pinId: pinRef, anchor: getAnchor(comp, pinRef) };
+    };
+
+    return activeLesson.requiredCircuit.connections
+      .map((conn) => {
+        const p1 = resolvePinAnchor(conn.from);
+        const p2 = resolvePinAnchor(conn.to);
+        if (!p1 || !p2) return null;
+
+        const isWired = circuit.wires.some(
+          (w) =>
+            (w.fromComponentId === p1.comp.id &&
+              w.fromPinId.toLowerCase() === p1.pinId &&
+              w.toComponentId === p2.comp.id &&
+              w.toPinId.toLowerCase() === p2.pinId) ||
+            (w.fromComponentId === p2.comp.id &&
+              w.fromPinId.toLowerCase() === p2.pinId &&
+              w.toComponentId === p1.comp.id &&
+              w.toPinId.toLowerCase() === p1.pinId)
+        );
+
+        return {
+          id: `${conn.from}->${conn.to}`,
+          p1: p1.anchor,
+          p2: p2.anchor,
+          description: conn.description,
+          isWired
+        };
+      })
+      .filter((g): g is NonNullable<typeof g> => g !== null);
+  }, [showWiringGuide, activeLesson, circuit]);
 
   // Dragging logic
   const handleMouseDown = (e: React.MouseEvent, compId: string, currentX: number, currentY: number) => {
@@ -197,8 +367,24 @@ export const CircuitCanvas: React.FC = () => {
           ))}
         </div>
 
-        {/* Right: Simulation Run/Stop Toggle & Auto-Wire */}
+        {/* Right: Simulation Run/Stop Toggle, Auto-Wire & Show Wiring */}
         <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Show me the wiring button */}
+          {activeLesson?.requiredCircuit && activeLesson.requiredCircuit.connections.length > 0 && (
+            <button
+              onClick={() => setShowWiringGuide(!showWiringGuide)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-mono font-bold text-xs shadow-md transition ${
+                showWiringGuide
+                  ? 'bg-cyan-500 hover:bg-cyan-600 text-white ring-2 ring-cyan-300 shadow-cyan-500/30'
+                  : 'bg-white/90 dark:bg-blueprint-nightCard/90 text-blueprint-navy dark:text-gray-200 hover:text-cyan-600 border border-blueprint-creamBorder dark:border-blueprint-nightBorder'
+              }`}
+              title="Show animated wiring connections overlay for this lesson"
+            >
+              {showWiringGuide ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <span>{showWiringGuide ? 'Hide Wiring' : 'Show Wiring'}</span>
+            </button>
+          )}
+
           {canAutoWire && (
             <button
               onClick={autoWireLed}
@@ -230,6 +416,9 @@ export const CircuitCanvas: React.FC = () => {
         </div>
       </div>
 
+      {/* Circuit Check Live Feedback Panel */}
+      <CircuitCheckPanel />
+
       {/* Warnings & Mistakes Alert Banner (Floating Bottom Left) */}
       {warnings.length > 0 && (
         <div className="absolute bottom-3 left-3 z-30 max-w-md space-y-1.5 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200">
@@ -259,56 +448,96 @@ export const CircuitCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* SVG Wires Layer */}
+      {/* SVG Wires & Ghost Guides Layer */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+        <defs>
+          <style>{`
+            @keyframes ghostDash {
+              to {
+                stroke-dashoffset: -24;
+              }
+            }
+            .ghost-guide-wire {
+              stroke-dasharray: 6 6;
+              animation: ghostDash 1.2s linear infinite;
+            }
+          `}</style>
+        </defs>
+
+        {/* Animated Ghost Wiring Guide Overlay */}
+        {showWiringGuide && (
+          <g>
+            {ghostConnections.map((ghost) => {
+              if (!ghost) return null;
+              const x1 = ghost.p1.x;
+              const y1 = ghost.p1.y;
+              const x2 = ghost.p2.x;
+              const y2 = ghost.p2.y;
+              const dx = (x2 - x1) * 0.5;
+              const dy = (y2 - y1) * 0.5;
+              const path = `M ${x1} ${y1} C ${x1 + dx} ${y1 + 40}, ${x2 - dx} ${y2 - 40}, ${x2} ${y2}`;
+
+              if (ghost.isWired) {
+                return (
+                  <g key={ghost.id} opacity={0.45}>
+                    <path
+                      d={path}
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                    />
+                    <circle cx={x1} cy={y1} r={3.5} fill="#10B981" />
+                    <circle cx={x2} cy={y2} r={3.5} fill="#10B981" />
+                  </g>
+                );
+              }
+
+              return (
+                <g key={ghost.id}>
+                  {/* Glowing Animated Dashed Wire */}
+                  <path
+                    d={path}
+                    fill="none"
+                    stroke="#06B6D4"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    className="ghost-guide-wire filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)]"
+                  />
+                  {/* Start Terminal Target Ring */}
+                  <circle
+                    cx={x1}
+                    cy={y1}
+                    r={7}
+                    fill="none"
+                    stroke="#06B6D4"
+                    strokeWidth={1.5}
+                    className="animate-ping opacity-75"
+                  />
+                  <circle cx={x1} cy={y1} r={4} fill="#06B6D4" />
+
+                  {/* End Terminal Target Ring */}
+                  <circle
+                    cx={x2}
+                    cy={y2}
+                    r={7}
+                    fill="none"
+                    stroke="#06B6D4"
+                    strokeWidth={1.5}
+                    className="animate-ping opacity-75"
+                  />
+                  <circle cx={x2} cy={y2} r={4} fill="#06B6D4" />
+                </g>
+              );
+            })}
+          </g>
+        )}
+
+        {/* Real Circuit Wires */}
         {circuit.wires.map((wire) => {
           const fromComp = circuit.components.find((c) => c.id === wire.fromComponentId);
           const toComp = circuit.components.find((c) => c.id === wire.toComponentId);
           if (!fromComp || !toComp) return null;
-
-          const getAnchor = (comp: typeof fromComp, pinId: string) => {
-            const norm = pinId.toLowerCase().trim();
-            if (comp.type === 'arduino_uno') {
-              const topPins = ['aref', 'gnd3', 'd13', 'd12', 'd11', 'd10', 'd9', 'd8', 'd7', 'd6', 'd5', 'd4', 'd3', 'd2', 'd1', 'd0'];
-              const topIdx = topPins.indexOf(norm);
-              if (topIdx !== -1) {
-                const rightStart = comp.x + 340 - 18;
-                return { x: rightStart - (15 - topIdx) * 17.5, y: comp.y + 12 };
-              }
-              const pwrPins = ['ioref', 'reset', '3v3', '5v', 'gnd1', 'gnd2', 'vin'];
-              const pIdx = pwrPins.indexOf(norm);
-              if (pIdx !== -1) {
-                return { x: comp.x + 72 + pIdx * 17.5, y: comp.y + 208 };
-              }
-            }
-            if (comp.type === 'led') {
-              if (norm === 'anode') return { x: comp.x + 24, y: comp.y + 78 };
-              if (norm === 'cathode') return { x: comp.x + 56, y: comp.y + 78 };
-              return { x: comp.x + 40, y: comp.y + 40 };
-            }
-            if (comp.type === 'resistor') {
-              if (norm === 'pin1') return { x: comp.x + 10, y: comp.y + 28 };
-              if (norm === 'pin2') return { x: comp.x + 102, y: comp.y + 28 };
-              return { x: comp.x + 56, y: comp.y + 28 };
-            }
-            if (comp.type === 'breadboard') {
-              const rowMatch = norm.match(/^([a-j])(\d+)$/);
-              if (rowMatch) {
-                const row = rowMatch[1];
-                const col = parseInt(rowMatch[2], 10);
-                const colX = comp.x + 28 + (col - 1) * 14.4;
-                const topRows = ['a', 'b', 'c', 'd', 'e'];
-                const botRows = ['f', 'g', 'h', 'i', 'j'];
-                if (topRows.includes(row)) {
-                  return { x: colX, y: comp.y + 36 + topRows.indexOf(row) * 12 };
-                }
-                if (botRows.includes(row)) {
-                  return { x: colX, y: comp.y + 126 + botRows.indexOf(row) * 12 };
-                }
-              }
-            }
-            return { x: comp.x + 40, y: comp.y + 40 };
-          };
 
           const p1 = getAnchor(fromComp, wire.fromPinId);
           const p2 = getAnchor(toComp, wire.toPinId);

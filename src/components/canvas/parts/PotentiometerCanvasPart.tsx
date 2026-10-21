@@ -19,6 +19,7 @@ export const PotentiometerCanvasPart: React.FC<PotPartProps> = ({
   const value = component.properties?.value ?? 512; // 0 to 1023
   const voltage = ((value / 1023) * 5.0).toFixed(2);
   const angle = ((value / 1023) * 270) - 135; // -135deg to +135deg
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -59,9 +60,15 @@ export const PotentiometerCanvasPart: React.FC<PotPartProps> = ({
             e.stopPropagation();
             onPinClick('vcc');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Terminal 1 (VCC)"
         >
+          {unconnectedPins.includes('vcc') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'vcc' ? 'bg-blueprint-teal animate-ping' : 'bg-red-500'
@@ -75,9 +82,15 @@ export const PotentiometerCanvasPart: React.FC<PotPartProps> = ({
             e.stopPropagation();
             onPinClick('wiper');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Terminal 2 (Wiper A0)"
         >
+          {unconnectedPins.includes('wiper') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3.5 h-3.5 rounded-full border-2 ${
               activeWiringPin === 'wiper' ? 'bg-blueprint-teal animate-ping' : 'bg-amber-400'
@@ -91,9 +104,15 @@ export const PotentiometerCanvasPart: React.FC<PotPartProps> = ({
             e.stopPropagation();
             onPinClick('gnd');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Terminal 3 (GND)"
         >
+          {unconnectedPins.includes('gnd') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'gnd' ? 'bg-blueprint-teal animate-ping' : 'bg-gray-900'

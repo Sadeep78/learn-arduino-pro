@@ -16,6 +16,7 @@ export const BuzzerCanvasPart: React.FC<BuzzerPartProps> = ({
   activeWiringPin
 }) => {
   const isActive = Boolean(component.properties?.active);
+  const unconnectedPins = component.properties?.unconnectedPins || [];
 
   return (
     <div
@@ -44,9 +45,15 @@ export const BuzzerCanvasPart: React.FC<BuzzerPartProps> = ({
             e.stopPropagation();
             onPinClick('pos');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Positive (+) Pin"
         >
+          {unconnectedPins.includes('pos') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'pos' ? 'bg-blueprint-teal animate-ping' : 'bg-red-500'
@@ -60,9 +67,15 @@ export const BuzzerCanvasPart: React.FC<BuzzerPartProps> = ({
             e.stopPropagation();
             onPinClick('neg');
           }}
-          className="flex flex-col items-center"
+          className="relative flex flex-col items-center"
           title="Negative (-) Pin"
         >
+          {unconnectedPins.includes('neg') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3 h-3 rounded-full border ${
               activeWiringPin === 'neg' ? 'bg-blueprint-teal animate-ping' : 'bg-gray-400'

@@ -20,11 +20,12 @@ import { useSimulatorStore } from '../store/useSimulatorStore';
 
 export const LessonsView: React.FC = () => {
   const { activeLessonId, setActiveLessonId, setActiveNav, setIsQuizOpen, setIsCertificateOpen } = useUIStore();
-  const { completedLessons } = useProgressStore();
-  const { loadCircuit } = useSimulatorStore();
+  const { completedLessons, completeLesson } = useProgressStore();
+  const { loadCircuit, checklist, isShortCircuit } = useSimulatorStore();
 
   const lesson = LESSONS.find((l) => l.id === activeLessonId) || LESSONS[0];
   const isCompleted = completedLessons.includes(lesson.id);
+  const isCircuitValid = checklist.length > 0 && checklist.every((item) => item.status === 'pass') && !isShortCircuit;
 
   const currentIndex = LESSONS.findIndex((l) => l.id === lesson.id);
   const prevLesson = currentIndex > 0 ? LESSONS[currentIndex - 1] : null;
@@ -169,6 +170,45 @@ export const LessonsView: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Checkpoint & Circuit Completion Action */}
+            <div className="pt-2 border-t border-blueprint-creamBorder dark:border-blueprint-nightBorder">
+              <button
+                onClick={() => completeLesson(lesson.id, lesson.xpReward)}
+                disabled={!isCircuitValid || isCompleted}
+                className={`w-full py-2.5 px-4 rounded-xl font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm ${
+                  isCompleted
+                    ? 'bg-emerald-500 text-white cursor-default'
+                    : isCircuitValid
+                    ? 'bg-blueprint-teal hover:bg-blueprint-tealHover text-white shadow-blueprint-teal/30 cursor-pointer animate-pulse'
+                    : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                }`}
+                title={
+                  isCompleted
+                    ? 'Lesson already completed'
+                    : isCircuitValid
+                    ? `Mark lesson as complete and claim +${lesson.xpReward} XP!`
+                    : 'Circuit must be wired correctly before marking as complete.'
+                }
+              >
+                {isCompleted ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Lesson Completed</span>
+                  </>
+                ) : isCircuitValid ? (
+                  <>
+                    <Award className="w-4 h-4" />
+                    <span>Mark as Complete (+{lesson.xpReward} XP)</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    <span>Mark as Complete (Fix Circuit First)</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 

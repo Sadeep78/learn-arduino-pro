@@ -1,4 +1,4 @@
-import { CircuitState } from './simulator';
+import { CircuitState, RequiredCircuit } from './simulator';
 
 export type LessonCategory = 'basics' | 'sensors' | 'actuators' | 'communication' | 'projects';
 
@@ -37,6 +37,7 @@ export interface Lesson {
   codeSnippet: string;
   precompiledHex: string;
   initialCircuit: CircuitState;
+  requiredCircuit?: RequiredCircuit;
   checkpoints: LessonCheckpoint[];
   quiz: QuizQuestion[];
   troubleshootingTips: string[];

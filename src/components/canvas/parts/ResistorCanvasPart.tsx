@@ -29,6 +29,8 @@ export const ResistorCanvasPart: React.FC<ResistorPartProps> = ({
   const c3 = bandColors[multiplier] || '#8B4513';
   const c4 = '#D4AF37'; // Gold 5%
 
+  const unconnectedPins: string[] = component.properties?.unconnectedPins || [];
+
   return (
     <div
       className={`relative w-28 h-14 flex items-center justify-between px-1 rounded-xl transition-all select-none ${
@@ -42,11 +44,17 @@ export const ResistorCanvasPart: React.FC<ResistorPartProps> = ({
           e.stopPropagation();
           onPinClick('pin1');
         }}
-        className={`flex flex-col items-center group ${
+        className={`flex flex-col items-center group relative ${
           activeWiringPin === 'pin1' ? 'scale-125' : ''
         }`}
         title="Resistor Lead 1"
       >
+        {unconnectedPins.includes('pin1') && (
+          <span className="absolute -top-1 -right-1 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+        )}
         <div
           className={`w-3.5 h-3.5 rounded-full border-2 transition ${
             activeWiringPin === 'pin1'
@@ -81,11 +89,17 @@ export const ResistorCanvasPart: React.FC<ResistorPartProps> = ({
           e.stopPropagation();
           onPinClick('pin2');
         }}
-        className={`flex flex-col items-center group ${
+        className={`flex flex-col items-center group relative ${
           activeWiringPin === 'pin2' ? 'scale-125' : ''
         }`}
         title="Resistor Lead 2"
       >
+        {unconnectedPins.includes('pin2') && (
+          <span className="absolute -top-1 -right-1 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+        )}
         <div
           className={`w-3.5 h-3.5 rounded-full border-2 transition ${
             activeWiringPin === 'pin2'

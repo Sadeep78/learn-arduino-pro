@@ -36,7 +36,10 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
 
   const hexColor = colorHexMap[color] || '#EF4444';
   const unlitStyle = unlitColorMap[color] || unlitColorMap.red;
-  const isGlowing = brightness > 0.05;
+  const isBurnt = Boolean(component.properties?.isBurnt);
+  const isBackwards = Boolean(component.properties?.isBackwards);
+  const unconnectedPins: string[] = component.properties?.unconnectedPins || [];
+  const isGlowing = !isBurnt && !isBackwards && brightness > 0.05;
 
   return (
     <div
@@ -68,19 +71,53 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
             onPinClick('anode');
           }}
           className={`w-10 h-10 rounded-full relative flex items-center justify-center transition-all duration-150 border-2 cursor-pointer ${
-            isGlowing ? 'border-white/80 shadow-lg' : 'border-black/60 shadow-inner hover:border-blueprint-teal'
+            isBurnt
+              ? 'border-red-900 bg-stone-900 shadow-inner'
+              : isBackwards
+                ? 'border-amber-600 bg-amber-950/70 shadow-inner'
+                : isGlowing
+                  ? 'border-white/80 shadow-lg'
+                  : 'border-black/60 shadow-inner hover:border-blueprint-teal'
           }`}
-          title="LED Bulb (Click to wire Anode +)"
+          title={
+            isBurnt
+              ? 'LED burned out! Add a resistor (220 ohm)'
+              : isBackwards
+                ? 'LED is backwards! Swap Anode (+) and Cathode (-)'
+                : 'LED Bulb (Click to wire Anode +)'
+          }
           style={{
-            backgroundColor: isGlowing ? hexColor : unlitStyle.bg,
-            borderColor: isGlowing ? 'rgba(255, 255, 255, 0.85)' : unlitStyle.border,
-            boxShadow: isGlowing
-              ? `0 0 16px ${hexColor}, inset 0 0 6px rgba(255, 255, 255, 0.5)`
-              : 'inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4)'
+            backgroundColor: isBurnt
+              ? '#1c1917'
+              : isBackwards
+                ? '#291e0a'
+                : isGlowing
+                  ? hexColor
+                  : unlitStyle.bg,
+            borderColor: isBurnt
+              ? '#7f1d1d'
+              : isBackwards
+                ? '#d97706'
+                : isGlowing
+                  ? 'rgba(255, 255, 255, 0.85)'
+                  : unlitStyle.border,
+            boxShadow: isBurnt
+              ? 'inset 0 0 10px #000'
+              : isGlowing
+                ? `0 0 16px ${hexColor}, inset 0 0 6px rgba(255, 255, 255, 0.5)`
+                : 'inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4)'
           }}
         >
-          {/* Internal filament/die: glowing white when on, dark metallic die when off */}
-          {isGlowing ? (
+          {/* Status overlay */}
+          {isBurnt ? (
+            <div className="flex flex-col items-center">
+              <span className="text-[8px] font-black font-mono text-red-500 leading-none">BURNT</span>
+            </div>
+          ) : isBackwards ? (
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black font-mono text-amber-400 leading-none">REV</span>
+            </div>
+          ) : isGlowing ? (
             <div className="w-3.5 h-3.5 rounded-full bg-white/90 shadow-md animate-pulse" />
           ) : (
             <div className="relative w-3 h-2.5 flex items-center justify-center opacity-60">
@@ -99,11 +136,18 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
             e.stopPropagation();
             onPinClick('anode');
           }}
-          className={`flex flex-col items-center group ${
+          className={`flex flex-col items-center group relative ${
             activeWiringPin === 'anode' ? 'scale-125' : ''
           }`}
           title="Anode (+) Longer Lead"
         >
+          {/* Unconnected Pin Red Dot Indicator */}
+          {unconnectedPins.includes('anode') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3.5 h-3.5 rounded-full border-2 transition ${
               activeWiringPin === 'anode'
@@ -120,11 +164,18 @@ export const LedCanvasPart: React.FC<LedPartProps> = ({
             e.stopPropagation();
             onPinClick('cathode');
           }}
-          className={`flex flex-col items-center group ${
+          className={`flex flex-col items-center group relative ${
             activeWiringPin === 'cathode' ? 'scale-125' : ''
           }`}
           title="Cathode (-) Flat Lead / GND"
         >
+          {/* Unconnected Pin Red Dot Indicator */}
+          {unconnectedPins.includes('cathode') && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
           <div
             className={`w-3.5 h-3.5 rounded-full border-2 transition ${
               activeWiringPin === 'cathode'

@@ -4,11 +4,13 @@ import {
   CircuitComponent,
   CircuitWire,
   CircuitWarning,
+  CircuitCheckItem,
   ComponentType,
   PinState
 } from '../types/simulator';
 import { validateCircuit } from '../lib/circuit/validator';
 import { updateComponentStates } from '../lib/circuit/connectivity';
+import { evaluateElectricalCircuit } from '../lib/circuit/electricalEngine';
 import { AvrRunner } from '../lib/avr/avrRunner';
 import { SketchRunner } from '../lib/avr/sketchRunner';
 import { DEFAULT_SKETCHES } from '../data/defaultSketches';
@@ -29,6 +31,8 @@ interface SimulatorStore {
   serialBaudRate: number;
   plotterValues: number[];
   warnings: CircuitWarning[];
+  checklist: CircuitCheckItem[];
+  isShortCircuit: boolean;
   activeRunner: 'avr' | 'sketch';
 
   // Undo / Redo history
@@ -161,7 +165,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
   serialLogs: ['Learn Arduino Pro Virtual Serial Console Initialized at 9600 baud.\n'],
   serialBaudRate: 9600,
   plotterValues: [],
-  warnings: validateCircuit(DEFAULT_CIRCUIT),
+  warnings: evaluateElectricalCircuit(DEFAULT_CIRCUIT, DEFAULT_SKETCHES[0].code, initPinStates()).warnings,
+  checklist: evaluateElectricalCircuit(DEFAULT_CIRCUIT, DEFAULT_SKETCHES[0].code, initPinStates()).checklist,
+  isShortCircuit: false,
   activeRunner: 'sketch',
   past: [],
   future: [],
@@ -204,12 +210,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       ...state.circuit,
       components: [...state.circuit.components, newComponent]
     };
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: newCircuit,
-      warnings: validateCircuit(newCircuit),
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit,
       selectedComponentId: id
     });
   },
@@ -249,13 +258,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     );
 
     const newCircuit = { components: newComponents, wires: newWires };
-    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: { ...newCircuit, components: resolvedComponents },
-      warnings: validateCircuit(newCircuit),
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit,
       selectedComponentId: null
     });
   },
@@ -270,10 +281,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     });
 
     const newCircuit = { ...state.circuit, components: updated };
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
+
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: newCircuit
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit
     });
   },
 
@@ -289,7 +305,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       return c;
     });
 
-    set({ circuit: { ...state.circuit, components: updated } });
+    const newCircuit = { ...state.circuit, components: updated };
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
+
+    set({
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit
+    });
   },
 
   startWiring: (componentId, pinId) => {
@@ -323,13 +347,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       ...state.circuit,
       wires: [...state.circuit.wires, newWire]
     };
-    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: { ...newCircuit, components: resolvedComponents },
-      warnings: validateCircuit(newCircuit),
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit,
       wiringSource: null,
       selectedWireId: wireId
     });
@@ -343,13 +369,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     const state = get();
     const newWires = state.circuit.wires.filter((w) => w.id !== id);
     const newCircuit = { ...state.circuit, wires: newWires };
-    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
+    const erc = evaluateElectricalCircuit(newCircuit, state.activeCode, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: { ...newCircuit, components: resolvedComponents },
-      warnings: validateCircuit(newCircuit),
+      circuit: { ...newCircuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit,
       selectedWireId: null
     });
   },
@@ -358,10 +386,23 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
   selectComponent: (id) => set({ selectedComponentId: id, selectedWireId: null }),
   selectWire: (id) => set({ selectedWireId: id, selectedComponentId: null }),
 
-  setActiveCode: (code) => set({ activeCode: code }),
+  setActiveCode: (code) => {
+    const state = get();
+    const erc = evaluateElectricalCircuit(state.circuit, code, state.pinStates);
+    set({
+      activeCode: code,
+      circuit: { ...state.circuit, components: erc.updatedComponents },
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit
+    });
+  },
 
   startSimulation: (hexPayload) => {
     const state = get();
+    if (state.isShortCircuit) {
+      return;
+    }
 
     // Callback on pin changes
     const onPinChange = (pin: number, pState: { high: boolean; pwm: number; voltage: number }) => {
@@ -375,12 +416,17 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           lastToggledMs: Date.now()
         };
 
-        // Update visual components based on electrical connectivity to this pin
-        const updatedComps = updateComponentStates(st.circuit, nextPins);
+        const erc = evaluateElectricalCircuit(st.circuit, st.activeCode, nextPins);
+        if (erc.isShortCircuit && st.isRunning) {
+          setTimeout(() => get().stopSimulation(), 0);
+        }
 
         return {
           pinStates: nextPins,
-          circuit: { ...st.circuit, components: updatedComps }
+          circuit: { ...st.circuit, components: erc.updatedComponents },
+          warnings: erc.warnings,
+          checklist: erc.checklist,
+          isShortCircuit: erc.isShortCircuit
         };
       });
     };
@@ -613,15 +659,17 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
   loadCircuit: (circuit, code) => {
     const state = get();
-    const resolvedComponents = updateComponentStates(circuit, state.pinStates);
-    const resolvedCircuit = { ...circuit, components: resolvedComponents };
+    const newCode = code || state.activeCode;
+    const erc = evaluateElectricalCircuit(circuit, newCode, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: resolvedCircuit,
-      activeCode: code || state.activeCode,
-      warnings: validateCircuit(resolvedCircuit),
+      circuit: { ...circuit, components: erc.updatedComponents },
+      activeCode: newCode,
+      warnings: erc.warnings,
+      checklist: erc.checklist,
+      isShortCircuit: erc.isShortCircuit,
       selectedComponentId: null,
       selectedWireId: null,
       wiringSource: null
