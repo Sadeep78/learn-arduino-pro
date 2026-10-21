@@ -1,0 +1,93 @@
+{
+  "brand": {
+    "title": "LEARN ARDUINO",
+    "pro": "PRO",
+    "tagline": "ගවේෂණය කරන්න · වටහාගන්න · නිර්මාණය කරන්න"
+  },
+  "nav": {
+    "home": "මුල් පිටුව",
+    "lessons": "පාඩම් මාලාව",
+    "components": "උපාංග නාමාවලිය",
+    "simulator": "අනුකරණය (Simulator)",
+    "projects": "ව්‍යාපෘති",
+    "community": "ප්‍රජාව",
+    "settings": "සැකසුම්",
+    "challenges": "අභියෝග",
+    "videos": "වීඩියෝ"
+  },
+  "topbar": {
+    "categoryProgress": "මූලික දැනුම",
+    "xp": "XP",
+    "level": "මට්ටම",
+    "streak": "දින දාමය",
+    "themeLight": "බ්ලූප්‍රින්ට් ආලෝකය",
+    "themeNight": "රාත්‍රී බ්ලූප්‍රින්ට්",
+    "guestMode": "අමුත්තාගේ ප්‍රකාරය",
+    "login": "ඇතුල් වන්න",
+    "profile": "ගිණුම"
+  },
+  "board": {
+    "orbitHint": "තිරය කරකැවීමට මවුසය ක්ලික් කර අදින්න, කොටස් පරීක්ෂා කිරීමට තිත් ඔබන්න",
+    "resetView": "පෙරදසුන යළි පිහිටුවන්න",
+    "zoomIn": "විශාලනය",
+    "zoomOut": "කුඩා කිරීම",
+    "isometric": "සමමිතික දසුන",
+    "topView": "උඩින් පෙනෙන දසුන",
+    "hotspots": "ක්‍රියාකාරී ස්ථාන",
+    "partHighlighted": "උපාංගය පරීක්ෂා කිරීම"
+  },
+  "tabs": {
+    "overview": "දළ විශ්ලේෂණය",
+    "pinout": "පින් සටහන (PINOUT)",
+    "example": "උදාහරණ කේතය",
+    "specs": "තාක්ෂණික පිරිවිතර"
+  },
+  "simulator": {
+    "run": "ධාවනය කරන්න (RUN)",
+    "stop": "නවත්වන්න (STOP)",
+    "step": "එක් පියවරක්",
+    "slowMotion": "මන්දගාමී ධාවනය",
+    "reset": "යළි පිහිටුවන්න",
+    "undo": "පෙර තත්වයට",
+    "redo": "නැවත කරන්න",
+    "rotate": "කරකවන්න",
+    "delete": "මකා දමන්න",
+    "addWire": "වයර් සම්බන්ධ කරන්න",
+    "baudRate": "Baud අගය",
+    "send": "යවන්න",
+    "clear": "මකන්න",
+    "uploadHardware": "Uno පුවරුවට අප්ලෝඩ් කරන්න",
+    "noErrors": "16 MHz වේගයෙන් සාමාන්‍ය පරිදි ධාවනය වේ.",
+    "warning": "පරිපථ දැනුම්දීම",
+    "shortCircuit": "කෙටි පරිපථයක් (Short Circuit) ඇත! VCC සහ GND අතර බරක් (Load) නැත.",
+    "missingResistor": "LED එකට Resistor එකක් නැත! භෞතිකව LED එක පිලිස්සී යා හැක.",
+    "serialMonitor": "Serial Monitor තිරය",
+    "serialPlotter": "Serial ප්‍රස්තාරය",
+    "logicAnalyzer": "ඩිජිටල් තරංග සටහන",
+    "registers": "AVR රෙජිස්ටර්"
+  },
+  "tutor": {
+    "title": "AI උපදේශකගෙන් අසන්න",
+    "placeholder": "මෙම පරිපථය හෝ කේතය ගැන ඕනෑම දෙයක් අසන්න...",
+    "explainCode": "කේතය පැහැදිලි කරන්න",
+    "whyNotBlinking": "මගේ LED එක දැල්වෙන්නේ නැත්තේ ඇයි?",
+    "giveHint": "ඉඟියක් දෙන්න",
+    "quizMe": "ප්‍රශ්නයක් අසන්න"
+  },
+  "lessons": {
+    "title": "පාඩම් මාලාව",
+    "badge": "අන්තර්ක්‍රියාකාරී පාඩම් 11",
+    "start": "පාඩම අරඹන්න",
+    "completed": "සම්පූර්ණයි",
+    "next": "ඊළඟ පාඩම",
+    "previous": "පෙර පාඩම",
+    "loadCircuit": "පරිපථය Simulator එකට එක් කරන්න",
+    "checkpoints": "පාඩමේ ඉලක්ක",
+    "quizTitle": "දැනුම පරීක්ෂාව"
+  },
+  "footer": {
+    "designedBy": "සැලසුම් හා නිර්මාණය",
+    "author": "සදීප් ශශංක (Sadeep Sasanka)",
+    "copyright": "සියලු හිමිකම් ඇවිරිණි. නිදහස් අධ්‍යාපනික මෙවලමකි."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "brand": {
+    "title": "LEARN ARDUINO",
+    "pro": "PRO",
+    "tagline": "EXPLORE · UNDERSTAND · BUILD"
+  },
+  "nav": {
+    "home": "Home",
+    "lessons": "Lessons",
+    "components": "Components",
+    "simulator": "Simulator",
+    "projects": "Projects",
+    "community": "Community",
+    "settings": "Settings",
+    "challenges": "Challenges",
+    "videos": "Videos"
+  },
+  "topbar": {
+    "categoryProgress": "BASICS",
+    "xp": "XP",
+    "level": "LVL",
+    "streak": "Day Streak",
+    "themeLight": "Light Blueprint",
+    "themeNight": "Night Blueprint",
+    "guestMode": "Guest Mode",
+    "login": "Sign In",
+    "profile": "Profile"
+  },
+  "board": {
+    "orbitHint": "Click & drag to orbit, scroll to zoom, click hotspots to explore parts",
+    "resetView": "Reset View",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "isometric": "Isometric",
+    "topView": "Top Down",
+    "hotspots": "Pinpoint Hotspots",
+    "partHighlighted": "Inspecting Component"
+  },
+  "tabs": {
+    "overview": "OVERVIEW",
+    "pinout": "PINOUT",
+    "example": "EXAMPLE",
+    "specs": "SPECIFICATIONS"
+  },
+  "simulator": {
+    "run": "Run Simulation",
+    "stop": "Stop",
+    "step": "Step",
+    "slowMotion": "Slow Mo",
+    "reset": "Reset Canvas",
+    "undo": "Undo",
+    "redo": "Redo",
+    "rotate": "Rotate",
+    "delete": "Delete",
+    "addWire": "Connect Wire",
+    "baudRate": "Baud Rate",
+    "send": "Send",
+    "clear": "Clear",
+    "uploadHardware": "Upload to Uno (Web Serial)",
+    "noErrors": "Simulation running normally at 16 MHz.",
+    "warning": "Circuit Notice",
+    "shortCircuit": "Short circuit detected! VCC is wired directly to GND without load.",
+    "missingResistor": "LED has no current-limiting resistor! It may burn out in physical hardware.",
+    "serialMonitor": "Serial Monitor",
+    "serialPlotter": "Serial Plotter",
+    "logicAnalyzer": "Logic Waveform",
+    "registers": "AVR Registers"
+  },
+  "tutor": {
+    "title": "Ask the Tutor",
+    "placeholder": "Ask anything about this circuit or code...",
+    "explainCode": "Explain this code",
+    "whyNotBlinking": "Why isn't my LED blinking?",
+    "giveHint": "Give me a progressive hint",
+    "quizMe": "Quiz me on this topic"
+  },
+  "lessons": {
+    "title": "CURRICULUM LESSONS",
+    "badge": "11 Interactive Lessons",
+    "start": "Launch Lesson",
+    "completed": "Completed",
+    "next": "Next Lesson",
+    "previous": "Previous Lesson",
+    "loadCircuit": "Load Circuit into Simulator",
+    "checkpoints": "Lesson Objectives",
+    "quizTitle": "Test Your Knowledge"
+  },
+  "footer": {
+    "designedBy": "Designed & Engineered by",
+    "author": "Sadeep Sasanka",
+    "copyright": "All rights reserved. Open-source educational tool."
+  }
+}
