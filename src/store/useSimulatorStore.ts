@@ -8,6 +8,7 @@ import {
   PinState
 } from '../types/simulator';
 import { validateCircuit } from '../lib/circuit/validator';
+import { updateComponentStates } from '../lib/circuit/connectivity';
 import { AvrRunner } from '../lib/avr/avrRunner';
 import { SketchRunner } from '../lib/avr/sketchRunner';
 import { DEFAULT_SKETCHES } from '../data/defaultSketches';
@@ -247,10 +248,12 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     );
 
     const newCircuit = { components: newComponents, wires: newWires };
+    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
+
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: newCircuit,
+      circuit: { ...newCircuit, components: resolvedComponents },
       warnings: validateCircuit(newCircuit),
       selectedComponentId: null
     });
@@ -319,11 +322,12 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       ...state.circuit,
       wires: [...state.circuit.wires, newWire]
     };
+    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: newCircuit,
+      circuit: { ...newCircuit, components: resolvedComponents },
       warnings: validateCircuit(newCircuit),
       wiringSource: null,
       selectedWireId: wireId
@@ -338,11 +342,12 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     const state = get();
     const newWires = state.circuit.wires.filter((w) => w.id !== id);
     const newCircuit = { ...state.circuit, wires: newWires };
+    const resolvedComponents = updateComponentStates(newCircuit, state.pinStates);
 
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit: newCircuit,
+      circuit: { ...newCircuit, components: resolvedComponents },
       warnings: validateCircuit(newCircuit),
       selectedWireId: null
     });
@@ -369,19 +374,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           lastToggledMs: Date.now()
         };
 
-        // Also update visual components connected to this pin (e.g. LED brightness)
-        const updatedComps = st.circuit.components.map((c) => {
-          if (c.type === 'led') {
-            return {
-              ...c,
-              properties: {
-                ...c.properties,
-                brightness: pState.pwm > 0 ? pState.pwm / 255 : pState.high ? 1.0 : 0.0
-              }
-            };
-          }
-          return c;
-        });
+        // Update visual components based on electrical connectivity to this pin
+        const updatedComps = updateComponentStates(st.circuit, nextPins);
 
         return {
           pinStates: nextPins,
@@ -441,11 +435,17 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     if (sketchEngine) sketchEngine.stop();
     soundSynth.stopTone();
 
-    // Turn off LED brightness
+    // Turn off component outputs
     const state = get();
     const turnedOffComps = state.circuit.components.map((c) => {
       if (c.type === 'led') {
         return { ...c, properties: { ...c.properties, brightness: 0 } };
+      }
+      if (c.type === 'rgb_led') {
+        return { ...c, properties: { ...c.properties, r: 0, g: 0, b: 0 } };
+      }
+      if (c.type === 'buzzer') {
+        return { ...c, properties: { ...c.properties, active: false } };
       }
       return c;
     });
@@ -521,12 +521,15 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
   loadCircuit: (circuit, code) => {
     const state = get();
+    const resolvedComponents = updateComponentStates(circuit, state.pinStates);
+    const resolvedCircuit = { ...circuit, components: resolvedComponents };
+
     set({
       past: [...state.past, state.circuit],
       future: [],
-      circuit,
+      circuit: resolvedCircuit,
       activeCode: code || state.activeCode,
-      warnings: validateCircuit(circuit),
+      warnings: validateCircuit(resolvedCircuit),
       selectedComponentId: null,
       selectedWireId: null,
       wiringSource: null
