@@ -1,28 +1,28 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   RotateCw,
   Trash2,
   Undo2,
   Redo2,
   AlertTriangle,
-  Info,
   Maximize2,
   Play,
   Square,
-  Sparkles,
   Zap,
   Palette,
   Eye,
-  EyeOff
+  EyeOff,
+  ZoomIn,
+  ZoomOut,
+  X
 } from 'lucide-react';
 import { useSimulatorStore } from '../../store/useSimulatorStore';
 import { useUIStore } from '../../store/useUIStore';
 import { ComponentType, CircuitComponent } from '../../types/simulator';
 import { LESSONS } from '../../data/lessons';
-import { CircuitCheckPanel } from './CircuitCheckPanel';
 
 // Component Canvas Parts
-import { UnoCanvasPart } from './parts/UnoCanvasPart';
+import { UnoCanvasPart, getUnoPinAnchor } from './parts/UnoCanvasPart';
 import { BreadboardCanvasPart } from './parts/BreadboardCanvasPart';
 import { LedCanvasPart } from './parts/LedCanvasPart';
 import { RgbLedCanvasPart } from './parts/RgbLedCanvasPart';
@@ -38,29 +38,12 @@ import { SevenSegmentCanvasPart } from './parts/SevenSegmentCanvasPart';
 
 export const getAnchor = (comp: CircuitComponent, pinId: string): { x: number; y: number } => {
   const norm = pinId.toLowerCase().trim();
+
   if (comp.type === 'arduino_uno') {
-    const topPins = ['aref', 'gnd3', 'd13', 'd12', 'd11', 'd10', 'd9', 'd8', 'd7', 'd6', 'd5', 'd4', 'd3', 'd2', 'd1', 'd0'];
-    const cleanNorm = norm.startsWith('d')
-      ? norm
-      : ['13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0'].includes(norm)
-      ? `d${norm}`
-      : norm;
-    const topIdx = topPins.indexOf(cleanNorm);
-    if (topIdx !== -1) {
-      const rightStart = comp.x + 340 - 18;
-      return { x: rightStart - (15 - topIdx) * 17.5, y: comp.y + 12 };
-    }
-    const pwrPins = ['ioref', 'reset', '3v3', '5v', 'gnd1', 'gnd2', 'vin'];
-    const pIdx = pwrPins.indexOf(norm === 'gnd' ? 'gnd1' : norm);
-    if (pIdx !== -1) {
-      return { x: comp.x + 72 + pIdx * 17.5, y: comp.y + 208 };
-    }
-    const aPins = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5'];
-    const aIdx = aPins.indexOf(norm);
-    if (aIdx !== -1) {
-      return { x: comp.x + 340 - 18 - (5 - aIdx) * 17.5, y: comp.y + 208 };
-    }
+    const offset = getUnoPinAnchor(pinId);
+    return { x: comp.x + offset.x, y: comp.y + offset.y };
   }
+
   if (comp.type === 'led') {
     if (norm === 'anode' || norm === 'pos' || norm === 'a') return { x: comp.x + 24, y: comp.y + 78 };
     if (norm === 'cathode' || norm === 'neg' || norm === 'k') return { x: comp.x + 56, y: comp.y + 78 };
@@ -119,21 +102,41 @@ export const getAnchor = (comp: CircuitComponent, pinId: string): { x: number; y
     if (norm === 'trig') return { x: comp.x + 68, y: comp.y + 102 };
     if (norm === 'echo') return { x: comp.x + 108, y: comp.y + 102 };
     if (norm === 'gnd') return { x: comp.x + 148, y: comp.y + 102 };
-    return { x: comp.x + 88, y: comp.y + 56 };
+    return { x: comp.x + 88, y: comp.y + 40 };
+  }
+  if (comp.type === 'lcd1602') {
+    if (norm === 'gnd') return { x: comp.x + 24, y: comp.y + 116 };
+    if (norm === 'vcc') return { x: comp.x + 56, y: comp.y + 116 };
+    if (norm === 'sda') return { x: comp.x + 88, y: comp.y + 116 };
+    if (norm === 'scl') return { x: comp.x + 120, y: comp.y + 116 };
+    return { x: comp.x + 72, y: comp.y + 60 };
+  }
+  if (comp.type === 'seven_segment') {
+    const topLabels = ['g', 'f', 'com1', 'a', 'b'];
+    const botLabels = ['e', 'd', 'com2', 'c', 'dp'];
+    const tIdx = topLabels.indexOf(norm);
+    if (tIdx !== -1) return { x: comp.x + 16 + tIdx * 18, y: comp.y + 10 };
+    const bIdx = botLabels.indexOf(norm);
+    if (bIdx !== -1) return { x: comp.x + 16 + bIdx * 18, y: comp.y + 116 };
+    return { x: comp.x + 52, y: comp.y + 64 };
   }
   if (comp.type === 'rgb_led') {
-    if (norm === 'r') return { x: comp.x + 18, y: comp.y + 98 };
-    if (norm === 'cathode' || norm === 'gnd') return { x: comp.x + 38, y: comp.y + 98 };
-    if (norm === 'g') return { x: comp.x + 58, y: comp.y + 98 };
-    if (norm === 'b') return { x: comp.x + 78, y: comp.y + 98 };
-    return { x: comp.x + 48, y: comp.y + 56 };
+    if (norm === 'red' || norm === 'r') return { x: comp.x + 16, y: comp.y + 96 };
+    if (norm === 'cathode' || norm === 'com' || norm === 'gnd') return { x: comp.x + 40, y: comp.y + 106 };
+    if (norm === 'green' || norm === 'g') return { x: comp.x + 64, y: comp.y + 96 };
+    if (norm === 'blue' || norm === 'b') return { x: comp.x + 88, y: comp.y + 96 };
+    return { x: comp.x + 52, y: comp.y + 40 };
   }
+
   return { x: comp.x + 40, y: comp.y + 40 };
 };
 
 export const CircuitCanvas: React.FC = () => {
   const {
     circuit,
+    isRunning,
+    startSimulation,
+    stopSimulation,
     selectedComponentId,
     selectedWireId,
     wiringSource,
@@ -141,101 +144,234 @@ export const CircuitCanvas: React.FC = () => {
     warnings,
     past,
     future,
-    isRunning,
-    startSimulation,
-    stopSimulation,
+    moveComponent,
+    rotateComponent,
+    removeComponent,
     selectComponent,
     selectWire,
+    removeWire,
+    setWireColor,
+    undo,
+    redo,
     startWiring,
     completeWiring,
     cancelWiring,
-    setWireColor,
-    rotateComponent,
-    removeComponent,
-    removeWire,
-    moveComponent,
-    updateComponentProperty,
-    undo,
-    redo,
     autoWireLed,
-    resetCanvas
+    updateComponentProperty
   } = useSimulatorStore();
 
-  const hasUno = circuit.components.some((c) => c.type === 'arduino_uno');
-  const hasLed = circuit.components.some((c) => c.type === 'led');
-  const isLedOn = circuit.components.some((c) => c.type === 'led' && (c.properties?.brightness ?? 0) > 0.05);
-  const canAutoWire = hasUno && hasLed && !isLedOn;
+  const { activeLessonId } = useUIStore();
+  const activeLesson = LESSONS.find((l) => l.id === activeLessonId);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const [draggingCompId, setDraggingCompId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [showWiringGuide, setShowWiringGuide] = useState<boolean>(false);
+
+  // Pan and Zoom states
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Warning toast auto-dismiss
+  const [warningDismissed, setWarningDismissed] = useState<boolean>(false);
+  const warningTimerRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (warnings.length > 0) {
+      setWarningDismissed(false);
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+      warningTimerRef.current = setTimeout(() => {
+        setWarningDismissed(true);
+      }, 6000);
+    }
+    return () => {
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+    };
+  }, [warnings]);
+
+  // Fit to view calculation
+  const handleFitToView = () => {
+    if (!canvasRef.current || circuit.components.length === 0) {
+      setZoom(1.0);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const width = rect.width || 800;
+    const height = rect.height || 600;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    circuit.components.forEach((c) => {
+      const compW = c.type === 'arduino_uno' ? 380 : c.type === 'breadboard' ? 460 : 120;
+      const compH = c.type === 'arduino_uno' ? 230 : c.type === 'breadboard' ? 160 : 100;
+      minX = Math.min(minX, c.x);
+      minY = Math.min(minY, c.y);
+      maxX = Math.max(maxX, c.x + compW);
+      maxY = Math.max(maxY, c.y + compH);
+    });
+
+    const pad = 36;
+    const bboxW = Math.max(200, maxX - minX + pad * 2);
+    const bboxH = Math.max(200, maxY - minY + pad * 2);
+
+    const fitScale = Math.min(1.05, Math.max(0.45, Math.min(width / bboxW, height / bboxH)));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const fitPanX = width / 2 - centerX * fitScale;
+    const fitPanY = height / 2 - centerY * fitScale;
+
+    setZoom(fitScale);
+    setPan({ x: fitPanX, y: fitPanY });
+  };
+
+  // Run Fit to view automatically whenever a lesson loads
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFitToView();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [activeLessonId]);
+
+  // Dragging logic
+  const handleCompMouseDown = (e: React.MouseEvent, compId: string, currentX: number, currentY: number) => {
+    e.stopPropagation();
+    selectComponent(compId);
+    setDraggingCompId(compId);
+
+    if (canvasRef.current) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const worldMouseX = (e.clientX - rect.left - pan.x) / zoom;
+      const worldMouseY = (e.clientY - rect.top - pan.y) / zoom;
+      setDragOffset({
+        x: worldMouseX - currentX,
+        y: worldMouseY - currentY
+      });
+    }
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    // Only pan if clicking canvas background, not controls
+    setIsPanning(true);
+    panStartRef.current = {
+      x: e.clientX - pan.x,
+      y: e.clientY - pan.y
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const worldX = (e.clientX - rect.left - pan.x) / zoom;
+    const worldY = (e.clientY - rect.top - pan.y) / zoom;
+    setMousePos({ x: worldX, y: worldY });
+
+    if (draggingCompId) {
+      const newX = Math.round(worldX - dragOffset.x);
+      const newY = Math.round(worldY - dragOffset.y);
+      moveComponent(draggingCompId, Math.max(10, newX), Math.max(10, newY));
+    } else if (isPanning) {
+      setPan({
+        x: e.clientX - panStartRef.current.x,
+        y: e.clientY - panStartRef.current.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDraggingCompId(null);
+    setIsPanning(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (!canvasRef.current) return;
+
+    const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+    const newZoom = Math.min(2.0, Math.max(0.4, zoom * zoomFactor));
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const newPanX = mouseX - (mouseX - pan.x) * (newZoom / zoom);
+    const newPanY = mouseY - (mouseY - pan.y) * (newZoom / zoom);
+
+    setZoom(newZoom);
+    setPan({ x: newPanX, y: newPanY });
+  };
+
+  const handlePinClick = (componentId: string, pinId: string) => {
+    if (!wiringSource) {
+      startWiring(componentId, pinId);
+    } else {
+      completeWiring(componentId, pinId);
+    }
+  };
 
   const wireColors = [
     { label: 'Green', hex: '#10B981' },
     { label: 'Red', hex: '#EF4444' },
     { label: 'Black', hex: '#1F2937' },
     { label: 'Blue', hex: '#3B82F6' },
-    { label: 'Yellow', hex: '#F59E0B' },
-    { label: 'Purple', hex: '#8B5CF6' }
+    { label: 'Yellow', hex: '#EAB308' },
+    { label: 'Purple', hex: '#A855F7' }
   ];
 
-  const { activeLessonId } = useUIStore();
-  const [showWiringGuide, setShowWiringGuide] = useState<boolean>(false);
-  const activeLesson = LESSONS.find((l) => l.id === activeLessonId);
+  const hasUno = circuit.components.some((c) => c.type === 'arduino_uno');
+  const hasLed = circuit.components.some((c) => c.type === 'led');
+  const canAutoWire = hasUno && hasLed && !isRunning;
 
-  const ghostConnections = React.useMemo(() => {
+  // Build ghost guide wires for active lesson
+  const ghostWires = React.useMemo(() => {
     if (!showWiringGuide || !activeLesson?.requiredCircuit?.connections) return [];
-
-    const resolvePinAnchor = (target: string) => {
-      const parts = target.split(':');
-      const compRef = parts[0].toLowerCase().trim();
-      const pinRef = parts[1]?.toLowerCase().trim();
-      if (!pinRef) return null;
-
-      let comp = circuit.components.find((c) => c.id.toLowerCase() === compRef);
-      if (!comp) {
-        const typeMap: Record<string, ComponentType> = {
-          uno: 'arduino_uno',
-          bb: 'breadboard',
-          res: 'resistor',
-          led: 'led',
-          btn: 'button',
-          pot: 'potentiometer',
-          buzzer: 'buzzer',
-          bz: 'buzzer',
-          servo: 'servo',
-          srv: 'servo',
-          ldr: 'ldr',
-          sonar: 'ultrasonic',
-          ultrasonic: 'ultrasonic',
-          rgb: 'rgb_led'
-        };
-        const prefix = compRef.split('-')[0];
-        const targetType = typeMap[prefix];
-        if (targetType) {
-          comp = circuit.components.find((c) => c.type === targetType);
-        }
-      }
-      if (!comp) return null;
-      return { comp, pinId: pinRef, anchor: getAnchor(comp, pinRef) };
-    };
 
     return activeLesson.requiredCircuit.connections
       .map((conn) => {
-        const p1 = resolvePinAnchor(conn.from);
-        const p2 = resolvePinAnchor(conn.to);
+        const [fromC, fromP] = conn.from.split(':');
+        const [toC, toP] = conn.to.split(':');
+
+        const p1 = (() => {
+          let comp = circuit.components.find((c) => c.id === fromC);
+          if (!comp) {
+            const uno = circuit.components.find((c) => c.type === 'arduino_uno');
+            if (uno && fromC.includes('uno')) comp = uno;
+          }
+          if (!comp) return null;
+          return { comp, pinId: fromP, anchor: getAnchor(comp, fromP) };
+        })();
+
+        const p2 = (() => {
+          let comp = circuit.components.find((c) => c.id === toC);
+          if (!comp) {
+            if (toC.includes('res')) comp = circuit.components.find((c) => c.type === 'resistor');
+            else if (toC.includes('led')) comp = circuit.components.find((c) => c.type === 'led');
+            else if (toC.includes('uno')) comp = circuit.components.find((c) => c.type === 'arduino_uno');
+            else if (toC.includes('btn') || toC.includes('button')) comp = circuit.components.find((c) => c.type === 'button');
+          }
+          if (!comp) return null;
+          return { comp, pinId: toP, anchor: getAnchor(comp, toP) };
+        })();
+
         if (!p1 || !p2) return null;
 
         const isWired = circuit.wires.some(
           (w) =>
             (w.fromComponentId === p1.comp.id &&
-              w.fromPinId.toLowerCase() === p1.pinId &&
+              w.fromPinId.toLowerCase() === p1.pinId.toLowerCase() &&
               w.toComponentId === p2.comp.id &&
-              w.toPinId.toLowerCase() === p2.pinId) ||
+              w.toPinId.toLowerCase() === p2.pinId.toLowerCase()) ||
             (w.fromComponentId === p2.comp.id &&
-              w.fromPinId.toLowerCase() === p2.pinId &&
+              w.fromPinId.toLowerCase() === p2.pinId.toLowerCase() &&
               w.toComponentId === p1.comp.id &&
-              w.toPinId.toLowerCase() === p1.pinId)
+              w.toPinId.toLowerCase() === p1.pinId.toLowerCase())
         );
 
         return {
@@ -249,55 +385,30 @@ export const CircuitCanvas: React.FC = () => {
       .filter((g): g is NonNullable<typeof g> => g !== null);
   }, [showWiringGuide, activeLesson, circuit]);
 
-  // Dragging logic
-  const handleMouseDown = (e: React.MouseEvent, compId: string, currentX: number, currentY: number) => {
-    e.stopPropagation();
-    selectComponent(compId);
-    setDraggingCompId(compId);
-    setDragOffset({
-      x: e.clientX - currentX,
-      y: e.clientY - currentY
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (draggingCompId && canvasRef.current) {
-      const bounds = canvasRef.current.getBoundingClientRect();
-      const rawX = e.clientX - dragOffset.x;
-      const rawY = e.clientY - dragOffset.y;
-      moveComponent(draggingCompId, Math.max(10, rawX), Math.max(10, rawY));
-    }
-  };
-
-  const handleMouseUp = () => {
-    setDraggingCompId(null);
-  };
-
-  const handlePinClick = (componentId: string, pinId: string) => {
-    if (!wiringSource) {
-      startWiring(componentId, pinId);
-    } else {
-      completeWiring(componentId, pinId);
-    }
-  };
-
   return (
     <div
       ref={canvasRef}
+      onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onClick={() => {
-        selectComponent(null);
-        selectWire(null);
-        cancelWiring();
+      onWheel={handleWheel}
+      onClick={(e) => {
+        // Deselect if clicking directly on canvas background
+        if (e.target === canvasRef.current || (e.target as HTMLElement).tagName === 'svg') {
+          selectComponent(null);
+          selectWire(null);
+          cancelWiring();
+        }
       }}
-      className="relative w-full h-[620px] bg-blueprint-cream dark:bg-blueprint-nightBg rounded-2xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-blueprint overflow-hidden select-none"
+      className={`relative w-full h-[620px] bg-blueprint-cream dark:bg-blueprint-nightBg overflow-hidden select-none ${
+        isPanning ? 'cursor-grab active:cursor-grabbing' : ''
+      }`}
     >
       {/* Blueprint Grid Lines Background */}
       <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" />
 
       {/* Top Canvas Toolbar */}
-      <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
+      <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none gap-2 flex-wrap">
         {/* Left Action Buttons: Undo, Redo, Rotate, Delete */}
         <div className="flex items-center gap-1.5 pointer-events-auto bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md p-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
           <button
@@ -351,20 +462,57 @@ export const CircuitCanvas: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Wire Color Selector */}
-        <div className="hidden sm:flex items-center gap-1 pointer-events-auto bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
-          <Palette className="w-3.5 h-3.5 text-gray-400 mr-1" />
-          {wireColors.map((wc) => (
+        {/* Center: Wire Color Selector + Pan & Zoom Tools */}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Wire Color Selector */}
+          <div className="hidden sm:flex items-center gap-1 bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
+            <Palette className="w-3.5 h-3.5 text-gray-400 mr-1" />
+            {wireColors.map((wc) => (
+              <button
+                key={wc.hex}
+                onClick={() => setWireColor(wc.hex)}
+                className={`w-4 h-4 rounded-full border transition-all ${
+                  wireColor === wc.hex ? 'scale-125 ring-2 ring-blueprint-teal' : 'hover:scale-110'
+                }`}
+                style={{ backgroundColor: wc.hex }}
+                title={`${wc.label} Wire`}
+              />
+            ))}
+          </div>
+
+          {/* Pan & Zoom Controls */}
+          <div className="flex items-center gap-1 bg-white/90 dark:bg-blueprint-nightCard/90 backdrop-blur-md px-2 py-1 rounded-xl border border-blueprint-creamBorder dark:border-blueprint-nightBorder shadow-sm">
             <button
-              key={wc.hex}
-              onClick={() => setWireColor(wc.hex)}
-              className={`w-4 h-4 rounded-full border transition-all ${
-                wireColor === wc.hex ? 'scale-125 ring-2 ring-blueprint-teal' : 'hover:scale-110'
-              }`}
-              style={{ backgroundColor: wc.hex }}
-              title={`${wc.label} Wire`}
-            />
-          ))}
+              onClick={handleFitToView}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono font-bold text-blueprint-navy dark:text-gray-200 hover:text-blueprint-teal hover:bg-black/5 dark:hover:bg-white/5 transition"
+              title="Fit all components to view"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-blueprint-teal" />
+              <span className="hidden md:inline">Fit to view</span>
+            </button>
+
+            <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-0.5" />
+
+            <button
+              onClick={() => setZoom((z) => Math.max(0.4, Number((z - 0.1).toFixed(2))))}
+              className="p-1 rounded-lg text-gray-500 hover:text-blueprint-teal transition"
+              title="Zoom out"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="text-[11px] font-mono font-bold text-gray-500 w-10 text-center">
+              {Math.round(zoom * 100)}%
+            </span>
+
+            <button
+              onClick={() => setZoom((z) => Math.min(2.0, Number((z + 0.1).toFixed(2))))}
+              className="p-1 rounded-lg text-gray-500 hover:text-blueprint-teal transition"
+              title="Zoom in"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Right: Simulation Run/Stop Toggle, Auto-Wire & Show Wiring */}
@@ -381,7 +529,7 @@ export const CircuitCanvas: React.FC = () => {
               title="Show animated wiring connections overlay for this lesson"
             >
               {showWiringGuide ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span>{showWiringGuide ? 'Hide Wiring' : 'Show Wiring'}</span>
+              <span className="hidden sm:inline">{showWiringGuide ? 'Hide Wiring' : 'Show Wiring'}</span>
             </button>
           )}
 
@@ -416,26 +564,33 @@ export const CircuitCanvas: React.FC = () => {
         </div>
       </div>
 
-      {/* Circuit Check Live Feedback Panel */}
-      <CircuitCheckPanel />
-
-      {/* Warnings & Mistakes Alert Banner (Floating Bottom Left) */}
-      {warnings.length > 0 && (
-        <div className="absolute bottom-3 left-3 z-30 max-w-md space-y-1.5 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200">
+      {/* Dismissible & Auto-hiding Warning Toast (Bottom Left, Stacks Above Controls) */}
+      {warnings.length > 0 && !warningDismissed && (
+        <div className="absolute bottom-4 left-4 z-40 max-w-sm space-y-1.5 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200">
           {warnings.slice(0, 2).map((w) => (
             <div
               key={w.id}
-              className={`p-2.5 rounded-xl border backdrop-blur-md shadow-lg flex items-start gap-2.5 text-xs ${
+              className={`p-2.5 rounded-xl border backdrop-blur-md shadow-lg flex items-start justify-between gap-2.5 text-xs ${
                 w.level === 'error'
                   ? 'bg-red-50/95 dark:bg-red-950/90 border-red-300 dark:border-red-800 text-red-800 dark:text-red-200'
                   : 'bg-amber-50/95 dark:bg-amber-950/90 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200'
               }`}
             >
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">{w.message}</p>
-                {w.helpText && <p className="text-[11px] opacity-85 mt-0.5">{w.helpText}</p>}
+              <div className="flex items-start gap-2 min-w-0">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold leading-tight">{w.message}</p>
+                  {w.helpText && <p className="text-[11px] opacity-85 mt-0.5 leading-snug">{w.helpText}</p>}
+                </div>
               </div>
+
+              <button
+                onClick={() => setWarningDismissed(true)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-0.5 rounded"
+                title="Dismiss warning"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           ))}
         </div>
@@ -448,155 +603,123 @@ export const CircuitCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* SVG Wires & Ghost Guides Layer */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-        <defs>
-          <style>{`
-            @keyframes ghostDash {
-              to {
-                stroke-dashoffset: -24;
+      {/* World Transform Container: Scales and Pans All Components and Wires Together */}
+      <div
+        className="w-full h-full relative"
+        style={{
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: '0 0'
+        }}
+      >
+        {/* SVG Wires Layer */}
+        <svg className="absolute inset-0 w-[4000px] h-[4000px] pointer-events-none z-10">
+          <defs>
+            <style>{`
+              @keyframes ghostDash {
+                to {
+                  stroke-dashoffset: -24;
+                }
               }
-            }
-            .ghost-guide-wire {
-              stroke-dasharray: 6 6;
-              animation: ghostDash 1.2s linear infinite;
-            }
-          `}</style>
-        </defs>
-
-        {/* Animated Ghost Wiring Guide Overlay */}
-        {showWiringGuide && (
-          <g>
-            {ghostConnections.map((ghost) => {
-              if (!ghost) return null;
-              const x1 = ghost.p1.x;
-              const y1 = ghost.p1.y;
-              const x2 = ghost.p2.x;
-              const y2 = ghost.p2.y;
-              const dx = (x2 - x1) * 0.5;
-              const dy = (y2 - y1) * 0.5;
-              const path = `M ${x1} ${y1} C ${x1 + dx} ${y1 + 40}, ${x2 - dx} ${y2 - 40}, ${x2} ${y2}`;
-
-              if (ghost.isWired) {
-                return (
-                  <g key={ghost.id} opacity={0.45}>
-                    <path
-                      d={path}
-                      fill="none"
-                      stroke="#10B981"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                    />
-                    <circle cx={x1} cy={y1} r={3.5} fill="#10B981" />
-                    <circle cx={x2} cy={y2} r={3.5} fill="#10B981" />
-                  </g>
-                );
+              .ghost-guide-wire {
+                animation: ghostDash 1.2s linear infinite;
               }
+            `}</style>
+          </defs>
 
-              return (
-                <g key={ghost.id}>
-                  {/* Glowing Animated Dashed Wire */}
-                  <path
-                    d={path}
-                    fill="none"
-                    stroke="#06B6D4"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    className="ghost-guide-wire filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)]"
-                  />
-                  {/* Start Terminal Target Ring */}
-                  <circle
-                    cx={x1}
-                    cy={y1}
-                    r={7}
-                    fill="none"
-                    stroke="#06B6D4"
-                    strokeWidth={1.5}
-                    className="animate-ping opacity-75"
-                  />
-                  <circle cx={x1} cy={y1} r={4} fill="#06B6D4" />
-
-                  {/* End Terminal Target Ring */}
-                  <circle
-                    cx={x2}
-                    cy={y2}
-                    r={7}
-                    fill="none"
-                    stroke="#06B6D4"
-                    strokeWidth={1.5}
-                    className="animate-ping opacity-75"
-                  />
-                  <circle cx={x2} cy={y2} r={4} fill="#06B6D4" />
-                </g>
-              );
-            })}
-          </g>
-        )}
-
-        {/* Real Circuit Wires */}
-        {circuit.wires.map((wire) => {
-          const fromComp = circuit.components.find((c) => c.id === wire.fromComponentId);
-          const toComp = circuit.components.find((c) => c.id === wire.toComponentId);
-          if (!fromComp || !toComp) return null;
-
-          const p1 = getAnchor(fromComp, wire.fromPinId);
-          const p2 = getAnchor(toComp, wire.toPinId);
-          const x1 = p1.x;
-          const y1 = p1.y;
-          const x2 = p2.x;
-          const y2 = p2.y;
-
-          // Smooth Bezier curve control points
-          const dx = (x2 - x1) * 0.5;
-          const dy = (y2 - y1) * 0.5;
-          const path = `M ${x1} ${y1} C ${x1 + dx} ${y1 + 40}, ${x2 - dx} ${y2 - 40}, ${x2} ${y2}`;
-
-          const isSelected = selectedWireId === wire.id;
-
-          return (
-            <g key={wire.id}>
-              {/* Invisible thicker hit-box path for easier selection */}
+          {/* Animated Ghost Guide Wires */}
+          {ghostWires.map((g) => (
+            <g key={g.id}>
               <path
-                d={path}
+                d={`M ${g.p1.x} ${g.p1.y} C ${g.p1.x} ${(g.p1.y + g.p2.y) / 2}, ${g.p2.x} ${(g.p1.y + g.p2.y) / 2}, ${g.p2.x} ${g.p2.y}`}
                 fill="none"
-                stroke="transparent"
-                strokeWidth={16}
-                className="cursor-pointer pointer-events-auto"
+                stroke={g.isWired ? '#10B981' : '#06B6D4'}
+                strokeWidth={g.isWired ? 3 : 2.5}
+                strokeDasharray={g.isWired ? 'none' : '6 6'}
+                strokeOpacity={g.isWired ? 0.35 : 0.85}
+                className={g.isWired ? '' : 'ghost-guide-wire'}
+              />
+              {!g.isWired && (
+                <>
+                  <circle cx={g.p1.x} cy={g.p1.y} r={4} fill="#06B6D4" opacity={0.8} />
+                  <circle cx={g.p2.x} cy={g.p2.y} r={4} fill="#06B6D4" opacity={0.8} />
+                </>
+              )}
+            </g>
+          ))}
+
+          {/* User Connected Wires */}
+          {circuit.wires.map((wire) => {
+            const fromComp = circuit.components.find((c) => c.id === wire.fromComponentId);
+            const toComp = circuit.components.find((c) => c.id === wire.toComponentId);
+            if (!fromComp || !toComp) return null;
+
+            const start = getAnchor(fromComp, wire.fromPinId);
+            const end = getAnchor(toComp, wire.toPinId);
+            const isSelected = selectedWireId === wire.id;
+
+            const midY = (start.y + end.y) / 2;
+            const pathData = `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
+
+            return (
+              <g
+                key={wire.id}
                 onClick={(e) => {
                   e.stopPropagation();
                   selectWire(wire.id);
                 }}
-              />
-              {/* Visible rendered wire */}
-              <path
-                d={path}
-                fill="none"
-                stroke={wire.color}
-                strokeWidth={isSelected ? 4.5 : 3}
-                strokeLinecap="round"
-                className={`transition-all ${
-                  isSelected ? 'filter drop-shadow-[0_0_8px_rgba(22,184,176,0.8)]' : ''
-                }`}
-              />
-              {/* Start & End Terminal solder dots */}
-              <circle cx={x1} cy={y1} r={3.5} fill={wire.color} />
-              <circle cx={x2} cy={y2} r={3.5} fill={wire.color} />
-            </g>
-          );
-        })}
-      </svg>
+                className="cursor-pointer pointer-events-auto group"
+              >
+                {/* Thick invisible hit area for easy wire selection */}
+                <path d={pathData} fill="none" stroke="transparent" strokeWidth={16} />
+                {/* Visual Wire */}
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={wire.color}
+                  strokeWidth={isSelected ? 4.5 : 3}
+                  strokeLinecap="round"
+                  className="transition-all group-hover:brightness-125"
+                  style={{
+                    filter: isSelected ? 'drop-shadow(0 0 4px rgba(22, 184, 176, 0.8))' : 'none'
+                  }}
+                />
+                {/* Terminal Contacts */}
+                <circle cx={start.x} cy={start.y} r={3} fill="#1F2937" stroke={wire.color} strokeWidth={1} />
+                <circle cx={end.x} cy={end.y} r={3} fill="#1F2937" stroke={wire.color} strokeWidth={1} />
+              </g>
+            );
+          })}
 
-      {/* Electronic Components Canvas Layer */}
-      <div className="relative w-full h-full z-20 pointer-events-none">
+          {/* Active Wiring Cursor Line */}
+          {wiringSource && (() => {
+            const srcComp = circuit.components.find((c) => c.id === wiringSource.componentId);
+            if (!srcComp) return null;
+            const start = getAnchor(srcComp, wiringSource.pinId);
+            return (
+              <line
+                x1={start.x}
+                y1={start.y}
+                x2={mousePos.x}
+                y2={mousePos.y}
+                stroke={wireColor}
+                strokeWidth={3}
+                strokeDasharray="4 4"
+                className="animate-pulse"
+              />
+            );
+          })()}
+        </svg>
+
+        {/* Placed Circuit Components */}
         {circuit.components.map((comp) => {
           const isSelected = selectedComponentId === comp.id;
-          const activeWiringPin =
-            wiringSource?.componentId === comp.id ? wiringSource.pinId : null;
+          const isWiringThisComp = wiringSource?.componentId === comp.id;
+          const activePin = isWiringThisComp ? wiringSource?.pinId : null;
 
           return (
             <div
               key={comp.id}
-              onMouseDown={(e) => handleMouseDown(e, comp.id, comp.x, comp.y)}
+              onMouseDown={(e) => handleCompMouseDown(e, comp.id, comp.x, comp.y)}
               style={{
                 position: 'absolute',
                 left: `${comp.x}px`,
@@ -609,123 +732,108 @@ export const CircuitCanvas: React.FC = () => {
                 <UnoCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'breadboard' && (
                 <BreadboardCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'led' && (
                 <LedCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'rgb_led' && (
                 <RgbLedCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'resistor' && (
                 <ResistorCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'button' && (
                 <ButtonCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
-                  onTogglePress={() => {
-                    const current = Boolean(comp.properties?.isPressed);
-                    updateComponentProperty(comp.id, 'isPressed', !current);
-                  }}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
+                  onTogglePress={() => updateComponentProperty(comp.id, 'isPressed', !comp.properties?.isPressed)}
                 />
               )}
-
               {comp.type === 'potentiometer' && (
                 <PotentiometerCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                   onValueChange={(val) => updateComponentProperty(comp.id, 'value', val)}
                 />
               )}
-
               {comp.type === 'buzzer' && (
                 <BuzzerCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'servo' && (
                 <ServoCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'ldr' && (
                 <LdrCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
-                  onValueChange={(val) => updateComponentProperty(comp.id, 'value', val)}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
+                  onValueChange={(val) => updateComponentProperty(comp.id, 'lux', val)}
                 />
               )}
-
               {comp.type === 'ultrasonic' && (
                 <UltrasonicCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
-                  onDistanceChange={(val) => updateComponentProperty(comp.id, 'value', val)}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
+                  onDistanceChange={(dist) => updateComponentProperty(comp.id, 'distance', dist)}
                 />
               )}
-
               {comp.type === 'lcd1602' && (
                 <Lcd1602CanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
-
               {comp.type === 'seven_segment' && (
                 <SevenSegmentCanvasPart
                   component={comp}
                   isSelected={isSelected}
-                  onPinClick={(pinId) => handlePinClick(comp.id, pinId)}
-                  activeWiringPin={activeWiringPin}
+                  onPinClick={(pId) => handlePinClick(comp.id, pId)}
+                  activeWiringPin={activePin}
                 />
               )}
             </div>

@@ -682,3 +682,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     });
   }
 }));
+
+if (typeof window !== 'undefined') {
+  (window as any).__SIMULATOR_STORE__ = useSimulatorStore;
+}
